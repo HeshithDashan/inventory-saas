@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaaS Inventory</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-100 h-screen flex flex-col items-center justify-center relative">
+
+    <button onclick="toggleLanguage()" id="lang-btn" 
+            class="absolute top-5 right-5 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-full shadow-sm hover:bg-gray-50 text-sm font-semibold transition">
+        සිංහල
+    </button>
+
+    <div class="bg-white p-12 rounded-2xl shadow-xl text-center max-w-lg w-full">
+        <div class="text-6xl mb-6">🚀</div>
+        
+        <h1 id="welcome-title" class="text-4xl font-bold text-gray-900 mb-4">
+            Welcome, Sago!
+        </h1>
+        
+        <p id="welcome-desc" class="text-gray-600 text-lg mb-8">
+            The easiest way to manage your small business inventory and billing.
+        </p>
+
+        <button class="bg-blue-600 text-white text-lg font-medium px-8 py-3 rounded-lg hover:bg-blue-700 transition w-full shadow-md shadow-blue-200">
+            <span id="btn-text">Get Started</span>
+        </button>
+    </div>
+
+    <script>
+        let isEnglish = true;
+
+        const content = {
+            en: {
+                title: "Welcome!",
+                desc: "The easiest way to manage your small business inventory and billing.",
+                btn: "Get Started",
+                langBtn: "සිංහල"
+            },
+            si: {
+                title: "ආයුබෝවන්!",
+                desc: "පොඩි බිස්නස් වලට ගැලපෙනම Inventory සහ Billing සිස්ටම් එක.",
+                btn: "වැඩ පටන් ගමු",
+                langBtn: "English"
+            }
+        };
+
+        function toggleLanguage() {
+            isEnglish = !isEnglish; 
+            const lang = isEnglish ? 'en' : 'si';
+
+            document.getElementById('welcome-title').innerText = content[lang].title;
+            document.getElementById('welcome-desc').innerText = content[lang].desc;
+            document.getElementById('btn-text').innerText = content[lang].btn;
+            document.getElementById('lang-btn').innerText = content[lang].langBtn;
+        }
+    </script>
+</body>
+</html>

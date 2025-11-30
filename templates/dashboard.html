@@ -5,33 +5,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;700&display=swap');
+        .sinhala-font { font-family: 'Noto Sans Sinhala', sans-serif; }
+    </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50 transition-colors duration-300">
 
     <nav class="bg-white shadow-md px-4 py-3 md:px-6 md:py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-        <h1 class="text-xl md:text-2xl font-bold text-blue-600">Inventory SaaS 🚀</h1>
+        <h1 class="text-xl md:text-2xl font-bold text-blue-600 flex items-center gap-2">
+            <i class="fas fa-cubes"></i> <span id="nav-title">Inventory SaaS 🚀</span>
+        </h1>
         
         <div class="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
-            <!-- Search Bar Fixed -->
             <form action="/" method="GET" class="w-full md:w-64 relative">
-                <input type="text" name="search" value="{{ request.args.get('search', '') }}" placeholder="Search products..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
-                <button type="submit" class="absolute left-3 top-2.5 text-gray-400 focus:outline-none">
+                <input type="text" name="search" value="{{ request.args.get('search', '') }}" id="search-input" placeholder="Search products..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500 shadow-sm">
+                <button type="submit" class="absolute left-3 top-2.5 text-gray-400 focus:outline-none hover:text-blue-500">
                     <i class="fas fa-search"></i>
                 </button>
             </form>
 
-            <a href="/billing" class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded text-sm font-bold transition text-center w-full md:w-auto">
-                POS
-            </a>
-            
-            <a href="/reports" class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 rounded text-sm font-bold transition text-center w-full md:w-auto">
-                Reports
-            </a>
+            <button onclick="toggleLanguage()" id="lang-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg text-sm font-bold transition border border-gray-300 shadow-sm min-w-[100px] text-center">
+                සිංහල
+            </button>
 
-            <div class="flex items-center gap-3 justify-between w-full md:w-auto">
-                <span class="text-gray-600 font-medium text-sm md:text-base">Hello, {{ name }}!</span>
-                <a href="/logout" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 md:px-4 md:py-2 rounded text-sm font-bold transition flex items-center">
-                    Logout <i class="fas fa-sign-out-alt ml-2"></i>
+            <div class="flex gap-2 w-full md:w-auto justify-center">
+                <a href="/billing" class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded text-sm font-bold transition text-center shadow-sm flex items-center gap-1">
+                    <i class="fas fa-cash-register"></i> <span id="btn-pos">POS</span>
+                </a>
+                <a href="/reports" class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 rounded text-sm font-bold transition text-center shadow-sm flex items-center gap-1">
+                    <i class="fas fa-chart-line"></i> <span id="btn-reports">Reports</span>
+                </a>
+            </div>
+
+            <div class="flex items-center gap-3 justify-between w-full md:w-auto mt-2 md:mt-0">
+                <span class="text-gray-600 font-medium text-sm md:text-base flex items-center gap-1">
+                    <i class="fas fa-user-circle text-lg"></i> <span id="txt-hello">Hello</span>, {{ name }}!
+                </span>
+                <a href="/logout" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 md:px-4 md:py-2 rounded text-sm font-bold transition flex items-center shadow-sm">
+                    <span id="btn-logout">Logout</span> <i class="fas fa-sign-out-alt ml-2"></i>
                 </a>
             </div>
         </div>
@@ -41,52 +53,58 @@
         
         {% with messages = get_flashed_messages() %}
             {% if messages %}
-                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6 text-sm">
-                    {{ messages[0] }}
+                <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6 text-sm flex items-center gap-2 shadow-sm">
+                    <i class="fas fa-check-circle"></i> {{ messages[0] }}
                 </div>
             {% endif %}
         {% endwith %}
 
         <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-            <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Product List 📦</h2>
-            <a href="/add-product" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-md font-bold transition text-center">
-                + Add New Product
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-2">
+                <span id="txt-product-list">Product List</span> 📦
+            </h2>
+            <a href="/add-product" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-md font-bold transition text-center flex items-center justify-center gap-2 transform hover:scale-105">
+                <i class="fas fa-plus"></i> <span id="btn-add-product">Add New Product</span>
             </a>
         </div>
 
-        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse min-w-[600px]">
+                <table class="w-full text-left border-collapse min-w-[700px]">
                     <thead>
-                        <tr class="bg-gray-200 text-gray-700 uppercase text-xs md:text-sm leading-normal">
-                            <th class="py-3 px-4 md:px-6">ID</th>
-                            <th class="py-3 px-4 md:px-6">Product Name</th>
-                            <th class="py-3 px-4 md:px-6">Cost (Rs.)</th>
-                            <th class="py-3 px-4 md:px-6">Selling (Rs.)</th>
-                            <th class="py-3 px-4 md:px-6">Quantity</th>
-                            <th class="py-3 px-4 md:px-6 text-center">Actions</th>
+                        <tr class="bg-gray-100 text-gray-700 uppercase text-xs md:text-sm leading-normal border-b border-gray-300">
+                            <th class="py-3 px-4 md:px-6 font-bold">ID</th>
+                            <th class="py-3 px-4 md:px-6 font-bold" id="th-name">Product Name</th>
+                            <th class="py-3 px-4 md:px-6 font-bold" id="th-cost">Cost (Rs.)</th>
+                            <th class="py-3 px-4 md:px-6 font-bold" id="th-selling">Selling (Rs.)</th>
+                            <th class="py-3 px-4 md:px-6 font-bold" id="th-quantity">Quantity</th>
+                            <th class="py-3 px-4 md:px-6 font-bold text-center" id="th-actions">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="text-gray-600 text-xs md:text-sm font-light">
                         {% for product in products %}
-                        <tr class="border-b border-gray-200 hover:bg-gray-100">
-                            <td class="py-3 px-4 md:px-6">{{ product.id }}</td>
+                        <tr class="border-b border-gray-200 hover:bg-gray-50 transition duration-150">
+                            <td class="py-3 px-4 md:px-6 font-medium">{{ product.id }}</td>
                             <td class="py-3 px-4 md:px-6 font-medium text-gray-800">{{ product.name }}</td>
                             <td class="py-3 px-4 md:px-6 text-red-500 font-semibold">{{ "%.2f"|format(product.cost_price) }}</td>
                             <td class="py-3 px-4 md:px-6 text-green-600 font-bold">{{ "%.2f"|format(product.price) }}</td>
                             <td class="py-3 px-4 md:px-6">
                                 {% if product.quantity > 0 %}
-                                    <span class="bg-green-200 text-green-800 py-1 px-2 md:px-3 rounded-full text-xs font-bold whitespace-nowrap">{{ product.quantity }} In Stock</span>
+                                    <span class="bg-green-100 text-green-800 py-1 px-2 md:px-3 rounded-full text-xs font-bold whitespace-nowrap shadow-sm border border-green-200">
+                                        {{ product.quantity }} <span class="lbl-instock">In Stock</span>
+                                    </span>
                                 {% else %}
-                                    <span class="bg-red-200 text-red-800 py-1 px-2 md:px-3 rounded-full text-xs font-bold whitespace-nowrap">Out of Stock</span>
+                                    <span class="bg-red-100 text-red-800 py-1 px-2 md:px-3 rounded-full text-xs font-bold whitespace-nowrap shadow-sm border border-red-200">
+                                        <span class="lbl-outstock">Out of Stock</span>
+                                    </span>
                                 {% endif %}
                             </td>
                             <td class="py-3 px-4 md:px-6 text-center flex justify-center gap-3">
-                                <a href="/edit-product/{{ product.id }}" class="text-blue-500 hover:text-blue-700 transform hover:scale-110 transition">
-                                    <i class="fas fa-edit"></i>
+                                <a href="/edit-product/{{ product.id }}" class="text-blue-500 hover:text-blue-700 transform hover:scale-125 transition duration-200">
+                                    <i class="fas fa-edit text-lg"></i>
                                 </a>
-                                <button onclick="openDeleteModal('{{ product.id }}')" class="text-red-500 hover:text-red-700 transform hover:scale-110 transition">
-                                    <i class="fas fa-trash"></i>
+                                <button onclick="openDeleteModal('{{ product.id }}')" class="text-red-500 hover:text-red-700 transform hover:scale-125 transition duration-200">
+                                    <i class="fas fa-trash text-lg"></i>
                                 </button>
                             </td>
                         </tr>
@@ -96,32 +114,32 @@
             </div>
             
             {% if not products %}
-            <div class="p-10 text-center text-gray-500">
-                <i class="fas fa-box-open text-4xl mb-3"></i>
-                <p>No products found.</p>
+            <div class="p-12 text-center text-gray-500">
+                <i class="fas fa-box-open text-6xl mb-4 text-gray-300"></i>
+                <p class="text-lg" id="txt-no-products">No products found. Add one to get started!</p>
             </div>
             {% endif %}
         </div>
     </div>
 
-    <div id="deleteModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50 flex items-center justify-center">
-        <div class="relative p-5 border w-96 shadow-lg rounded-md bg-white">
+    <div id="deleteModal" class="fixed inset-0 bg-gray-900 bg-opacity-60 overflow-y-auto h-full w-full hidden z-50 flex items-center justify-center backdrop-blur-sm">
+        <div class="relative p-5 border w-96 shadow-2xl rounded-xl bg-white transform transition-all scale-100">
             <div class="mt-3 text-center">
-                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
-                    <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4 animate-bounce">
+                    <i class="fas fa-exclamation-triangle text-red-600 text-3xl"></i>
                 </div>
-                <h3 class="text-lg leading-6 font-medium text-gray-900 mt-4">Delete Product?</h3>
+                <h3 class="text-xl leading-6 font-bold text-gray-900" id="modal-title">Delete Product?</h3>
                 <div class="mt-2 px-7 py-3">
-                    <p class="text-sm text-gray-500">
+                    <p class="text-gray-500" id="modal-desc">
                         Are you sure you want to delete this product? This action cannot be undone.
                     </p>
                 </div>
-                <div class="items-center px-4 py-3">
-                    <button id="deleteConfirmBtn" class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-300">
-                        Yes, Delete
-                    </button>
-                    <button onclick="closeDeleteModal()" class="mt-3 px-4 py-2 bg-white text-gray-700 text-base font-medium rounded-md w-full shadow-sm border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                <div class="flex gap-3 justify-center mt-4">
+                    <button onclick="closeDeleteModal()" class="px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-lg shadow-sm hover:bg-gray-300 focus:outline-none transition w-1/2" id="btn-cancel">
                         Cancel
+                    </button>
+                    <button id="deleteConfirmBtn" class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-lg shadow-sm hover:bg-red-700 focus:outline-none transition w-1/2" id="btn-delete">
+                        Yes, Delete
                     </button>
                 </div>
             </div>
@@ -129,6 +147,98 @@
     </div>
 
     <script>
+        const langData = {
+            en: {
+                title: "Inventory SaaS 🚀",
+                search: "Search products...",
+                pos: "POS",
+                reports: "Reports",
+                hello: "Hello",
+                logout: "Logout",
+                productList: "Product List",
+                addProduct: "Add New Product",
+                thName: "Product Name",
+                thCost: "Cost (Rs.)",
+                thSelling: "Selling (Rs.)",
+                thQty: "Quantity",
+                thActions: "Actions",
+                inStock: "In Stock",
+                outStock: "Out of Stock",
+                noProducts: "No products found. Add one to get started!",
+                modalTitle: "Delete Product?",
+                modalDesc: "Are you sure you want to delete this product? This action cannot be undone.",
+                btnCancel: "Cancel",
+                btnDelete: "Yes, Delete",
+                langBtn: "සිංහල"
+            },
+            si: {
+                title: "ඉන්වෙන්ට්‍රි පද්ධතිය 🚀",
+                search: "බඩු සොයන්න...",
+                pos: "බිල් දමන්න",
+                reports: "වාර්තා",
+                hello: "ආයුබෝවන්",
+                logout: "ඉවත් වන්න",
+                productList: "බඩු ලැයිස්තුව",
+                addProduct: "අලුත් බඩුවක් දමන්න",
+                thName: "බඩුවේ නම",
+                thCost: "ගන්නා මිල (රු.)",
+                thSelling: "විකුණන මිල (රු.)",
+                thQty: "ප්‍රමාණය",
+                thActions: "ක්‍රියා",
+                inStock: "ඇත",
+                outStock: "නැත",
+                noProducts: "බඩු කිසිවක් නැත. අලුත් එකක් එකතු කරන්න!",
+                modalTitle: "බඩුව මකන්නද?",
+                modalDesc: "ඔබට මෙය මැකීමට අවශ්‍ය බව විශ්වාසද? මෙය නැවත ලබාගත නොහැක.",
+                btnCancel: "එපා",
+                btnDelete: "ඔව්, මකන්න",
+                langBtn: "English"
+            }
+        };
+
+        let currentLang = 'en';
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'si' : 'en';
+            const data = langData[currentLang];
+
+            document.getElementById('nav-title').innerText = data.title;
+            document.getElementById('search-input').placeholder = data.search;
+            document.getElementById('btn-pos').innerText = data.pos;
+            document.getElementById('btn-reports').innerText = data.reports;
+            document.getElementById('txt-hello').innerText = data.hello;
+            document.getElementById('btn-logout').innerText = data.logout;
+            document.getElementById('txt-product-list').innerText = data.productList;
+            document.getElementById('btn-add-product').innerText = data.addProduct;
+            
+            document.getElementById('th-name').innerText = data.thName;
+            document.getElementById('th-cost').innerText = data.thCost;
+            document.getElementById('th-selling').innerText = data.thSelling;
+            document.getElementById('th-quantity').innerText = data.thQty;
+            document.getElementById('th-actions').innerText = data.thActions;
+
+            document.getElementById('modal-title').innerText = data.modalTitle;
+            document.getElementById('modal-desc').innerText = data.modalDesc;
+            document.getElementById('btn-cancel').innerText = data.btnCancel;
+            
+            const deleteBtn = document.getElementById('deleteConfirmBtn');
+            if (deleteBtn) deleteBtn.innerText = data.btnDelete;
+            
+            document.querySelectorAll('.lbl-instock').forEach(el => el.innerText = data.inStock);
+            document.querySelectorAll('.lbl-outstock').forEach(el => el.innerText = data.outStock);
+            
+            const noProd = document.getElementById('txt-no-products');
+            if(noProd) noProd.innerText = data.noProducts;
+
+            document.getElementById('lang-btn').innerText = data.langBtn;
+
+            if (currentLang === 'si') {
+                document.body.classList.add('sinhala-font');
+            } else {
+                document.body.classList.remove('sinhala-font');
+            }
+        }
+
         function openDeleteModal(productId) {
             const modal = document.getElementById('deleteModal');
             const confirmBtn = document.getElementById('deleteConfirmBtn');

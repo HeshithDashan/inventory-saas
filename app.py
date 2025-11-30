@@ -21,6 +21,7 @@ def load_user(user_id):
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
+    email = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(150), nullable=False)
 
 class Product(db.Model):
@@ -30,27 +31,30 @@ class Product(db.Model):
     quantity = db.Column(db.Integer, nullable=False)
 
 @app.route('/')
+@login_required
 def home():
-    if not current_user.is_authenticated:
-        return redirect(url_for('login'))
-    return render_template('index.html', name=current_user.username)
+    return render_template('dashboard.html', name=current_user.username)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
         username = request.form.get('username')
+        email = request.form.get('email')
         password = request.form.get('password')
 
-        if User.query.filter_by(username=username).first():
-            flash('Username already exists! වෙන නමක් දාන්න සගෝ.')
+        user_exists = User.query.filter((User.username == username) | (User.email == email)).first()
+
+        if user_exists:
+            flash('Username or Email already exists!')
             return redirect(url_for('register'))
 
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
         
-        new_user = User(username=username, password=hashed_password)
+        new_user = User(username=username, email=email, password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
         
+        flash('Account created!')
         return redirect(url_for('login'))
     
     return render_template('register.html')
@@ -67,7 +71,7 @@ def login():
             login_user(user)
             return redirect(url_for('home'))
         else:
-            flash('Login Failed. නම හරි පාස්වර්ඩ් එක හරි වැරදියි.')
+            flash('Login Failed.')
             
     return render_template('login.html')
 
@@ -76,6 +80,11 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('login'))
+
+@app.route('/add-product')
+@login_required
+def add_product():
+    return "Add Product Page Coming Soon!"
 
 if __name__ == '__main__':
     with app.app_context():

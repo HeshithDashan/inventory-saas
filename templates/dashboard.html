@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Dashboard - SaaS Inventory</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+
+    <nav class="bg-white shadow-md px-6 py-4 flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-blue-600">Inventory SaaS 🚀</h1>
+        <div class="flex items-center gap-4">
+            <span class="text-gray-600 font-medium">Hello, {{ name }}!</span>
+            <a href="/logout" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded text-sm font-bold transition">
+                Logout <i class="fas fa-sign-out-alt ml-1"></i>
+            </a>
+        </div>
+    </nav>
+
+    <div class="container mx-auto mt-10 p-6">
+        
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold text-gray-800">Product List 📦</h2>
+            <a href="/add-product" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-md font-bold transition">
+                + Add New Product
+            </a>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-200 text-gray-700 uppercase text-sm leading-normal">
+                        <th class="py-3 px-6">ID</th>
+                        <th class="py-3 px-6">Product Name</th>
+                        <th class="py-3 px-6">Price (Rs.)</th>
+                        <th class="py-3 px-6">Quantity</th>
+                        <th class="py-3 px-6 text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-600 text-sm font-light">
+                    <tr class="border-b border-gray-200 hover:bg-gray-100">
+                        <td class="py-3 px-6">1</td>
+                        <td class="py-3 px-6 font-medium">Sample Item</td>
+                        <td class="py-3 px-6">1500.00</td>
+                        <td class="py-3 px-6"><span class="bg-green-200 text-green-800 py-1 px-3 rounded-full text-xs">Available</span></td>
+                        <td class="py-3 px-6 text-center">
+                            <button class="text-blue-500 hover:text-blue-700 mr-3"><i class="fas fa-edit"></i></button>
+                            <button class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</body>
+</html>

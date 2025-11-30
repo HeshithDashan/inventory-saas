@@ -2,22 +2,24 @@
 <html lang="en">
 <head>
     <title>Dashboard - SaaS Inventory</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body class="bg-gray-50">
 
-    <nav class="bg-white shadow-md px-6 py-4 flex justify-between items-center">
-        <h1 class="text-2xl font-bold text-blue-600">Inventory SaaS 🚀</h1>
-        <div class="flex items-center gap-4">
-            <span class="text-gray-600 font-medium">Hello, {{ name }}!</span>
-            <a href="/logout" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded text-sm font-bold transition">
-                Logout <i class="fas fa-sign-out-alt ml-1"></i>
+    <nav class="bg-white shadow-md px-4 py-3 md:px-6 md:py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+        <h1 class="text-xl md:text-2xl font-bold text-blue-600">Inventory SaaS 🚀</h1>
+        
+        <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
+            <span class="text-gray-600 font-medium text-sm md:text-base">Hello, {{ name }}!</span>
+            <a href="/logout" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 md:px-4 md:py-2 rounded text-sm font-bold transition flex items-center">
+                Logout <i class="fas fa-sign-out-alt ml-2"></i>
             </a>
         </div>
     </nav>
 
-    <div class="container mx-auto mt-10 p-6">
+    <div class="container mx-auto mt-6 md:mt-10 p-4 md:p-6">
         
         {% with messages = get_flashed_messages() %}
             {% if messages %}
@@ -27,47 +29,56 @@
             {% endif %}
         {% endwith %}
 
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-3xl font-bold text-gray-800">Product List 📦</h2>
-            <a href="/add-product" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-md font-bold transition">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+            <h2 class="text-2xl md:text-3xl font-bold text-gray-800">Product List 📦</h2>
+            <a href="/add-product" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-md font-bold transition text-center">
                 + Add New Product
             </a>
         </div>
 
         <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-            <table class="w-full text-left border-collapse">
-                <thead>
-                    <tr class="bg-gray-200 text-gray-700 uppercase text-sm leading-normal">
-                        <th class="py-3 px-6">ID</th>
-                        <th class="py-3 px-6">Product Name</th>
-                        <th class="py-3 px-6">Cost (Rs.)</th>
-                        <th class="py-3 px-6">Selling (Rs.)</th>
-                        <th class="py-3 px-6">Quantity</th>
-                        <th class="py-3 px-6 text-center">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="text-gray-600 text-sm font-light">
-                    {% for product in products %}
-                    <tr class="border-b border-gray-200 hover:bg-gray-100">
-                        <td class="py-3 px-6">{{ product.id }}</td>
-                        <td class="py-3 px-6 font-medium">{{ product.name }}</td>
-                        <td class="py-3 px-6 text-red-500">{{ "%.2f"|format(product.cost_price) }}</td>
-                        <td class="py-3 px-6 text-green-600 font-bold">{{ "%.2f"|format(product.price) }}</td>
-                        <td class="py-3 px-6">
-                            {% if product.quantity > 0 %}
-                                <span class="bg-green-200 text-green-800 py-1 px-3 rounded-full text-xs font-bold">{{ product.quantity }} In Stock</span>
-                            {% else %}
-                                <span class="bg-red-200 text-red-800 py-1 px-3 rounded-full text-xs font-bold">Out of Stock</span>
-                            {% endif %}
-                        </td>
-                        <td class="py-3 px-6 text-center">
-                            <button class="text-blue-500 hover:text-blue-700 mr-3"><i class="fas fa-edit"></i></button>
-                            <button class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[600px]">
+                    <thead>
+                        <tr class="bg-gray-200 text-gray-700 uppercase text-xs md:text-sm leading-normal">
+                            <th class="py-3 px-4 md:px-6">ID</th>
+                            <th class="py-3 px-4 md:px-6">Product Name</th>
+                            <th class="py-3 px-4 md:px-6">Cost (Rs.)</th>
+                            <th class="py-3 px-4 md:px-6">Selling (Rs.)</th>
+                            <th class="py-3 px-4 md:px-6">Quantity</th>
+                            <th class="py-3 px-4 md:px-6 text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-gray-600 text-xs md:text-sm font-light">
+                        {% for product in products %}
+                        <tr class="border-b border-gray-200 hover:bg-gray-100">
+                            <td class="py-3 px-4 md:px-6">{{ product.id }}</td>
+                            <td class="py-3 px-4 md:px-6 font-medium text-gray-800">{{ product.name }}</td>
+                            <td class="py-3 px-4 md:px-6 text-red-500 font-semibold">{{ "%.2f"|format(product.cost_price) }}</td>
+                            <td class="py-3 px-4 md:px-6 text-green-600 font-bold">{{ "%.2f"|format(product.price) }}</td>
+                            <td class="py-3 px-4 md:px-6">
+                                {% if product.quantity > 0 %}
+                                    <span class="bg-green-200 text-green-800 py-1 px-2 md:px-3 rounded-full text-xs font-bold whitespace-nowrap">{{ product.quantity }} In Stock</span>
+                                {% else %}
+                                    <span class="bg-red-200 text-red-800 py-1 px-2 md:px-3 rounded-full text-xs font-bold whitespace-nowrap">Out of Stock</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-3 px-4 md:px-6 text-center flex justify-center gap-3">
+                                <button class="text-blue-500 hover:text-blue-700 transform hover:scale-110 transition"><i class="fas fa-edit"></i></button>
+                                <button class="text-red-500 hover:text-red-700 transform hover:scale-110 transition"><i class="fas fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            {% if not products %}
+            <div class="p-10 text-center text-gray-500">
+                <i class="fas fa-box-open text-4xl mb-3"></i>
+                <p>No products found. Add one to get started!</p>
+            </div>
+            {% endif %}
         </div>
     </div>
 

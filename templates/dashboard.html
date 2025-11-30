@@ -40,7 +40,8 @@
                     <tr class="bg-gray-200 text-gray-700 uppercase text-sm leading-normal">
                         <th class="py-3 px-6">ID</th>
                         <th class="py-3 px-6">Product Name</th>
-                        <th class="py-3 px-6">Price (Rs.)</th>
+                        <th class="py-3 px-6">Cost (Rs.)</th>
+                        <th class="py-3 px-6">Selling (Rs.)</th>
                         <th class="py-3 px-6">Quantity</th>
                         <th class="py-3 px-6 text-center">Actions</th>
                     </tr>
@@ -50,7 +51,8 @@
                     <tr class="border-b border-gray-200 hover:bg-gray-100">
                         <td class="py-3 px-6">{{ product.id }}</td>
                         <td class="py-3 px-6 font-medium">{{ product.name }}</td>
-                        <td class="py-3 px-6">{{ "%.2f"|format(product.price) }}</td>
+                        <td class="py-3 px-6 text-red-500">{{ "%.2f"|format(product.cost_price) }}</td>
+                        <td class="py-3 px-6 text-green-600 font-bold">{{ "%.2f"|format(product.price) }}</td>
                         <td class="py-3 px-6">
                             {% if product.quantity > 0 %}
                                 <span class="bg-green-200 text-green-800 py-1 px-3 rounded-full text-xs font-bold">{{ product.quantity }} In Stock</span>

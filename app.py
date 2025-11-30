@@ -27,6 +27,7 @@ class User(db.Model, UserMixin):
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150), nullable=False)
+    cost_price = db.Column(db.Float, nullable=False)
     price = db.Column(db.Float, nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
 
@@ -87,10 +88,11 @@ def logout():
 def add_product():
     if request.method == 'POST':
         name = request.form.get('name')
+        cost_price = request.form.get('cost_price')
         price = request.form.get('price')
         quantity = request.form.get('quantity')
 
-        new_product = Product(name=name, price=float(price), quantity=int(quantity))
+        new_product = Product(name=name, cost_price=float(cost_price), price=float(price), quantity=int(quantity))
         
         db.session.add(new_product)
         db.session.commit()

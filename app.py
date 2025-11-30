@@ -102,6 +102,32 @@ def add_product():
 
     return render_template('add_product.html')
 
+@app.route('/edit-product/<int:id>', methods=['GET', 'POST'])
+@login_required
+def edit_product(id):
+    product = Product.query.get_or_404(id)
+
+    if request.method == 'POST':
+        product.name = request.form.get('name')
+        product.cost_price = float(request.form.get('cost_price'))
+        product.price = float(request.form.get('price'))
+        product.quantity = int(request.form.get('quantity'))
+
+        db.session.commit()
+        flash('Product updated successfully!')
+        return redirect(url_for('home'))
+
+    return render_template('edit_product.html', product=product)
+
+@app.route('/delete-product/<int:id>')
+@login_required
+def delete_product(id):
+    product = Product.query.get_or_404(id)
+    db.session.delete(product)
+    db.session.commit()
+    flash('Product deleted successfully!')
+    return redirect(url_for('home'))
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()

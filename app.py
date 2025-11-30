@@ -33,7 +33,8 @@ class Product(db.Model):
 @app.route('/')
 @login_required
 def home():
-    return render_template('dashboard.html', name=current_user.username)
+    products = Product.query.all()
+    return render_template('dashboard.html', name=current_user.username, products=products)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -81,10 +82,23 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
-@app.route('/add-product')
+@app.route('/add-product', methods=['GET', 'POST'])
 @login_required
 def add_product():
-    return "Add Product Page Coming Soon!"
+    if request.method == 'POST':
+        name = request.form.get('name')
+        price = request.form.get('price')
+        quantity = request.form.get('quantity')
+
+        new_product = Product(name=name, price=float(price), quantity=int(quantity))
+        
+        db.session.add(new_product)
+        db.session.commit()
+        
+        flash('Product added successfully!')
+        return redirect(url_for('home'))
+
+    return render_template('add_product.html')
 
 if __name__ == '__main__':
     with app.app_context():

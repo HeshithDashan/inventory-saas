@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Add Product - SaaS Inventory</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-96">
+        <h2 class="text-2xl font-bold mb-6 text-center text-blue-600">Add New Product 📦</h2>
+        
+        <form method="POST">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Product Name</label>
+                <input type="text" name="name" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300" required placeholder="Ex: Panadol Card">
+            </div>
+
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Price (Rs.)</label>
+                <input type="number" step="0.01" name="price" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300" required placeholder="Ex: 50.00">
+            </div>
+
+            <div class="mb-6">
+                <label class="block text-gray-700 text-sm font-bold mb-2">Quantity</label>
+                <input type="number" name="quantity" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300" required placeholder="Ex: 100">
+            </div>
+
+            <div class="flex justify-between gap-2">
+                <a href="/" class="w-1/2 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded text-center transition">
+                    Cancel
+                </a>
+                <button type="submit" class="w-1/2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition">
+                    Save Product
+                </button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

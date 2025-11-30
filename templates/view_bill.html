@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Bill Details - SaaS Inventory</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-10 flex justify-center">
+
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">Bill #{{ bill.id }}</h2>
+            <span class="text-gray-500 text-sm">{{ bill.date.strftime('%Y-%m-%d %H:%M') }}</span>
+        </div>
+
+        <table class="w-full text-left border-collapse mb-6">
+            <thead>
+                <tr class="border-b-2 border-gray-300">
+                    <th class="py-2">Item</th>
+                    <th class="py-2 text-center">Qty</th>
+                    <th class="py-2 text-right">Price</th>
+                    <th class="py-2 text-right">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in bill.items %}
+                <tr class="border-b border-gray-100">
+                    <td class="py-2">{{ item.product_name }}</td>
+                    <td class="py-2 text-center">{{ item.quantity }}</td>
+                    <td class="py-2 text-right">{{ "%.2f"|format(item.price) }}</td>
+                    <td class="py-2 text-right">{{ "%.2f"|format(item.total) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="flex justify-between items-center border-t-2 border-gray-300 pt-4 mb-6">
+            <h3 class="text-xl font-bold">Grand Total:</h3>
+            <h3 class="text-xl font-bold text-green-600">Rs. {{ "%.2f"|format(bill.total_amount) }}</h3>
+        </div>
+
+        <div class="text-center">
+            <a href="/reports" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm font-bold transition">
+                Back to Reports
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>

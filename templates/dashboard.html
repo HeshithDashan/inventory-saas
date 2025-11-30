@@ -11,11 +11,29 @@
     <nav class="bg-white shadow-md px-4 py-3 md:px-6 md:py-4 flex flex-col md:flex-row justify-between items-center gap-4">
         <h1 class="text-xl md:text-2xl font-bold text-blue-600">Inventory SaaS 🚀</h1>
         
-        <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
-            <span class="text-gray-600 font-medium text-sm md:text-base">Hello, {{ name }}!</span>
-            <a href="/logout" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 md:px-4 md:py-2 rounded text-sm font-bold transition flex items-center">
-                Logout <i class="fas fa-sign-out-alt ml-2"></i>
+        <div class="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
+            <!-- Search Bar Fixed -->
+            <form action="/" method="GET" class="w-full md:w-64 relative">
+                <input type="text" name="search" value="{{ request.args.get('search', '') }}" placeholder="Search products..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
+                <button type="submit" class="absolute left-3 top-2.5 text-gray-400 focus:outline-none">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+
+            <a href="/billing" class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded text-sm font-bold transition text-center w-full md:w-auto">
+                POS
             </a>
+            
+            <a href="/reports" class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 rounded text-sm font-bold transition text-center w-full md:w-auto">
+                Reports
+            </a>
+
+            <div class="flex items-center gap-3 justify-between w-full md:w-auto">
+                <span class="text-gray-600 font-medium text-sm md:text-base">Hello, {{ name }}!</span>
+                <a href="/logout" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 md:px-4 md:py-2 rounded text-sm font-bold transition flex items-center">
+                    Logout <i class="fas fa-sign-out-alt ml-2"></i>
+                </a>
+            </div>
         </div>
     </nav>
 
@@ -80,7 +98,7 @@
             {% if not products %}
             <div class="p-10 text-center text-gray-500">
                 <i class="fas fa-box-open text-4xl mb-3"></i>
-                <p>No products found. Add one to get started!</p>
+                <p>No products found.</p>
             </div>
             {% endif %}
         </div>

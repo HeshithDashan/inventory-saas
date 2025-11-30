@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>POS - SaaS Inventory</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+
+            #invoice-area,
+            #invoice-area * {
+                visibility: visible;
+            }
+
+            #invoice-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 h-screen flex flex-col">
+
+    <nav class="bg-white shadow-md p-4 flex justify-between items-center no-print">
+        <h1 class="text-xl font-bold text-green-600">POS System 🛒</h1>
+        <a href="/" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm font-bold transition">
+            Back to Dashboard
+        </a>
+    </nav>
+
+    <div class="flex flex-1 overflow-hidden">
+
+        <div class="w-1/2 p-6 overflow-y-auto no-print">
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-xl font-bold mb-4 text-gray-800">Add Items</h2>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Select Product</label>
+                    <select id="productSelect" class="w-full border rounded p-2">
+                        <option value="">Search Product...</option>
+                        {% for product in products %}
+                        <option value="{{ product.id }}" data-price="{{ product.price }}"
+                            data-stock="{{ product.quantity }}" data-name="{{ product.name }}">
+                            {{ product.name }} - Rs. {{ product.price }} (Stock: {{ product.quantity }})
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Quantity</label>
+                    <input type="number" id="qtyInput"
+                        class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-green-300"
+                        min="1" value="1">
+                </div>
+
+                <button onclick="addToCart()"
+                    class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded transition">
+                    Add to Bill
+                </button>
+            </div>
+        </div>
+
+        <div class="w-1/2 p-6 bg-gray-200 overflow-y-auto">
+            <div id="invoice-area" class="bg-white p-8 rounded-lg shadow-lg min-h-[500px]">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">INVOICE</h2>
+                    <p class="text-gray-500">Date: <span id="billDate"></span></p>
+                </div>
+
+                <table class="w-full text-left border-collapse mb-6">
+                    <thead>
+                        <tr class="border-b-2 border-gray-300">
+                            <th class="py-2">Item</th>
+                            <th class="py-2 text-center">Qty</th>
+                            <th class="py-2 text-right">Price</th>
+                            <th class="py-2 text-right">Total</th>
+                            <th class="py-2 text-center no-print">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="cartItems">
+
+                    </tbody>
+                </table>
+
+                <div class="flex justify-between items-center border-t-2 border-gray-300 pt-4">
+                    <h3 class="text-xl font-bold">Total Amount:</h3>
+                    <h3 class="text-xl font-bold text-green-600">Rs. <span id="grandTotal">0.00</span></h3>
+                </div>
+            </div>
+
+            <div class="mt-4 flex gap-2 no-print">
+                <button onclick="processCheckout()"
+                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded transition">
+                    Checkout & Save
+                </button>
+                <button onclick="window.print()"
+                    class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded transition">
+                    <i class="fas fa-print"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+    <script>
+
+        $(document).ready(function () {
+            $('#productSelect').select2();
+            document.getElementById('billDate').innerText = new Date().toLocaleDateString();
+        });
+
+        let cart = [];
+
+        function addToCart() {
+            const select = document.getElementById('productSelect');
+            const qtyInput = document.getElementById('qtyInput');
+            const productId = select.value;
+
+            if (!productId) return alert("Please select a product!");
+
+            const selectedOption = select.options[select.selectedIndex];
+            const name = selectedOption.getAttribute('data-name');
+            const price = parseFloat(selectedOption.getAttribute('data-price'));
+            const stock = parseInt(selectedOption.getAttribute('data-stock'));
+            const qty = parseInt(qtyInput.value);
+
+            if (qty > stock) return alert("Not enough stock!");
+
+            const existingItem = cart.find(item => item.id === productId);
+
+            if (existingItem) {
+                if (existingItem.qty + qty > stock) return alert("Not enough stock!");
+                existingItem.qty += qty;
+                existingItem.total = existingItem.qty * price;
+            } else {
+                cart.push({
+                    id: productId,
+                    name: name,
+                    price: price,
+                    qty: qty,
+                    total: price * qty
+                });
+            }
+
+            renderCart();
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            renderCart();
+        }
+
+        function renderCart() {
+            const tbody = document.getElementById('cartItems');
+            const grandTotalEl = document.getElementById('grandTotal');
+            tbody.innerHTML = '';
+            let total = 0;
+
+            cart.forEach((item, index) => {
+                total += item.total;
+                const row = `
+                    <tr class="border-b border-gray-100">
+                        <td class="py-2">${item.name}</td>
+                        <td class="py-2 text-center">${item.qty}</td>
+                        <td class="py-2 text-right">${item.price.toFixed(2)}</td>
+                        <td class="py-2 text-right">${item.total.toFixed(2)}</td>
+                        <td class="py-2 text-center no-print">
+                            <button onclick="removeFromCart(${index})" class="text-red-500 hover:text-red-700">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+
+            grandTotalEl.innerText = total.toFixed(2);
+        }
+
+        function processCheckout() {
+            if (cart.length === 0) return alert("Cart is empty!");
+
+            const total = parseFloat(document.getElementById('grandTotal').innerText);
+
+            fetch('/save-bill', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ items: cart, total: total })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("Bill Saved Successfully!");
+                        window.location.reload();
+                    } else {
+                        alert("Error: " + data.message);
+                    }
+                });
+        }
+    </script>
+
+</body>
+
+</html>

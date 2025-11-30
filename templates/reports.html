@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Sales Reports - SaaS Inventory</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+
+    <nav class="bg-white shadow-md p-4 flex justify-between items-center">
+        <h1 class="text-xl font-bold text-purple-600">Sales Reports 📈</h1>
+        <a href="/" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm font-bold transition">
+            Back to Dashboard
+        </a>
+    </nav>
+
+    <div class="container mx-auto mt-10 p-6">
+        
+        <div class="bg-white p-6 rounded-lg shadow-md mb-6 flex justify-between items-center">
+            <h2 class="text-2xl font-bold text-gray-800">Total Revenue</h2>
+            <span class="text-3xl font-bold text-green-600">Rs. {{ "%.2f"|format(total_revenue) }}</span>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-200 text-gray-700 uppercase text-sm leading-normal">
+                        <th class="py-3 px-6">Bill ID</th>
+                        <th class="py-3 px-6">Date</th>
+                        <th class="py-3 px-6 text-right">Total Amount (Rs.)</th>
+                        <th class="py-3 px-6 text-center">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-600 text-sm font-light">
+                    {% for bill in bills %}
+                    <tr class="border-b border-gray-200 hover:bg-gray-100">
+                        <td class="py-3 px-6">#{{ bill.id }}</td>
+                        <td class="py-3 px-6">{{ bill.date.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td class="py-3 px-6 text-right font-bold">{{ "%.2f"|format(bill.total_amount) }}</td>
+                        <td class="py-3 px-6 text-center">
+                            <a href="/view-bill/{{ bill.id }}" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-xs">
+                                View Items
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</body>
+</html>

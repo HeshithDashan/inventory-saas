@@ -1,7 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
+import json
 
 app = Flask(__name__)
 
@@ -31,10 +33,29 @@ class Product(db.Model):
     price = db.Column(db.Float, nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
 
+class Bill(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.DateTime, default=datetime.utcnow)
+    total_amount = db.Column(db.Float, nullable=False)
+    items = db.relationship('BillItem', backref='bill', lazy=True)
+
+class BillItem(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    bill_id = db.Column(db.Integer, db.ForeignKey('bill.id'), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    product_name = db.Column(db.String(150), nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    total = db.Column(db.Float, nullable=False)
+
 @app.route('/')
 @login_required
 def home():
-    products = Product.query.all()
+    search_query = request.args.get('search')
+    if search_query:
+        products = Product.query.filter(Product.name.ilike(f'%{search_query}%')).all()
+    else:
+        products = Product.query.all()
     return render_template('dashboard.html', name=current_user.username, products=products)
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -127,6 +148,61 @@ def delete_product(id):
     db.session.commit()
     flash('Product deleted successfully!')
     return redirect(url_for('home'))
+
+@app.route('/billing')
+@login_required
+def billing():
+    products = Product.query.all()
+    products_json = [{'id': p.id, 'name': p.name, 'price': p.price, 'stock': p.quantity} for p in products]
+    return render_template('billing.html', products=products, products_json=json.dumps(products_json))
+
+@app.route('/save-bill', methods=['POST'])
+@login_required
+def save_bill():
+    data = request.get_json()
+    items = data.get('items')
+    total_amount = data.get('total')
+
+    if not items:
+        return jsonify({'success': False, 'message': 'No items in bill'})
+
+    new_bill = Bill(total_amount=total_amount)
+    db.session.add(new_bill)
+    db.session.flush()
+
+    for item in items:
+        product = Product.query.get(item['id'])
+        if product:
+            if product.quantity >= item['qty']:
+                product.quantity -= item['qty']
+                
+                bill_item = BillItem(
+                    bill_id=new_bill.id,
+                    product_id=product.id,
+                    product_name=product.name,
+                    quantity=item['qty'],
+                    price=item['price'],
+                    total=item['total']
+                )
+                db.session.add(bill_item)
+            else:
+                return jsonify({'success': False, 'message': f'Not enough stock for {product.name}'})
+
+    db.session.commit()
+    return jsonify({'success': True, 'bill_id': new_bill.id})
+
+@app.route('/reports')
+@login_required
+def reports():
+    bills = Bill.query.order_by(Bill.date.desc()).all()
+    total_revenue = sum(bill.total_amount for bill in bills)
+    return render_template('reports.html', bills=bills, total_revenue=total_revenue)
+
+@app.route('/view-bill/<int:id>')
+@login_required
+def view_bill(id):
+    bill = Bill.query.get_or_404(id)
+    return render_template('view_bill.html', bill=bill)
 
 if __name__ == '__main__':
     with app.app_context():

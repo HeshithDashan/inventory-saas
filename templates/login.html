@@ -10,7 +10,7 @@
 
         {% with messages = get_flashed_messages() %}
             {% if messages %}
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                <div id="flash-message" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 transition-opacity duration-500 ease-out">
                     {{ messages[0] }}
                 </div>
             {% endif %}
@@ -33,5 +33,15 @@
             New here? <a href="/register" class="text-blue-500 font-bold">Register</a>
         </p>
     </div>
+
+    <script>
+        window.setTimeout(function() {
+            const flashMsg = document.getElementById('flash-message');
+            if (flashMsg) {
+                flashMsg.style.opacity = '0'; 
+                setTimeout(() => flashMsg.remove(), 500); 
+            }
+        }, 3000); // 3 Seconds
+    </script>
 </body>
 </html>

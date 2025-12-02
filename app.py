@@ -219,6 +219,41 @@ def view_bill(id):
     bill = Bill.query.get_or_404(id)
     return render_template('view_bill.html', bill=bill)
 
+@app.route('/settings', methods=['GET', 'POST'])
+@login_required
+def settings():
+    if request.method == 'POST':
+        action = request.form.get('action')
+
+        if action == 'update_profile':
+            new_username = request.form.get('username')
+            new_email = request.form.get('email')
+            
+            existing_user = User.query.filter(((User.username == new_username) | (User.email == new_email)) & (User.id != current_user.id)).first()
+            
+            if existing_user:
+                flash('Username or Email already taken!')
+            else:
+                current_user.username = new_username
+                current_user.email = new_email
+                db.session.commit()
+                flash('Profile updated successfully!')
+                
+        elif action == 'change_password':
+            current_password = request.form.get('current_password')
+            new_password = request.form.get('new_password')
+            
+            if not check_password_hash(current_user.password, current_password):
+                flash('Incorrect current password!')
+            else:
+                current_user.password = generate_password_hash(new_password, method='pbkdf2:sha256')
+                db.session.commit()
+                flash('Password changed successfully!')
+                
+        return redirect(url_for('settings'))
+        
+    return render_template('settings.html', user=current_user)
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()

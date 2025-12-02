@@ -17,8 +17,7 @@
 
 <body class="bg-gray-50 transition-colors duration-300">
 
-    <nav
-        class="bg-white shadow-md px-4 py-3 md:px-6 md:py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+    <nav class="bg-white shadow-md px-4 py-3 md:px-6 md:py-4 flex flex-col md:flex-row justify-between items-center gap-4">
         <h1 class="text-xl md:text-2xl font-bold text-blue-600 flex items-center gap-2">
             <i class="fas fa-cubes"></i> <span id="nav-title">Inventory SaaS 🚀</span>
         </h1>
@@ -51,9 +50,9 @@
             </div>
 
             <div class="flex items-center gap-3 justify-between w-full md:w-auto mt-2 md:mt-0">
-                <span class="text-gray-600 font-medium text-sm md:text-base flex items-center gap-1">
-                    <i class="fas fa-user-circle text-lg"></i> <span id="txt-hello">Hello</span>, {{ name }}!
-                </span>
+                <a href="/settings" class="text-gray-600 font-medium text-sm md:text-base flex items-center gap-1 hover:text-blue-600 transition" title="Go to Settings">
+                    <i class="fas fa-user-cog text-lg"></i> <span id="txt-hello">Hello</span>, {{ name }}!
+                </a>
                 <a href="/logout"
                     class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 md:px-4 md:py-2 rounded text-sm font-bold transition flex items-center shadow-sm">
                     <span id="btn-logout">Logout</span> <i class="fas fa-sign-out-alt ml-2"></i>

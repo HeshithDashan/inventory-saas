@@ -4,6 +4,7 @@ from flask_login import UserMixin, LoginManager, login_user, login_required, log
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import json
+from collections import defaultdict
 
 app = Flask(__name__)
 
@@ -196,7 +197,21 @@ def save_bill():
 def reports():
     bills = Bill.query.order_by(Bill.date.desc()).all()
     total_revenue = sum(bill.total_amount for bill in bills)
-    return render_template('reports.html', bills=bills, total_revenue=total_revenue)
+
+    sales_data = defaultdict(float)
+    for bill in bills:
+        date_str = bill.date.strftime('%Y-%m-%d')
+        sales_data[date_str] += bill.total_amount
+
+    sorted_dates = sorted(sales_data.keys())
+    chart_labels = sorted_dates
+    chart_values = [sales_data[date] for date in sorted_dates]
+
+    return render_template('reports.html', 
+                           bills=bills, 
+                           total_revenue=total_revenue,
+                           chart_labels=json.dumps(chart_labels),
+                           chart_values=json.dumps(chart_values))
 
 @app.route('/view-bill/<int:id>')
 @login_required

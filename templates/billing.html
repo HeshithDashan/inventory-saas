@@ -30,10 +30,24 @@
                 display: none !important;
             }
         }
+        
+        #notification-toast {
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
     </style>
 </head>
 
 <body class="bg-gray-100 h-screen flex flex-col">
+
+    <div id="notification-toast" class="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 hidden min-w-[300px]">
+        <div id="notif-content" class="bg-gray-800 text-white px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3 border-l-4">
+            <i id="notif-icon" class="fas fa-info-circle text-xl"></i>
+            <div>
+                <h4 id="notif-title" class="font-bold text-sm uppercase tracking-wide">Notification</h4>
+                <p id="notif-message" class="text-sm font-medium">Message goes here...</p>
+            </div>
+        </div>
+    </div>
 
     <nav class="bg-white shadow-md p-4 flex justify-between items-center no-print">
         <h1 class="text-xl font-bold text-green-600">POS System 🛒</h1>
@@ -128,12 +142,46 @@
 
         let cart = [];
 
+        function showNotification(title, message, type) {
+            const toast = document.getElementById('notification-toast');
+            const content = document.getElementById('notif-content');
+            const icon = document.getElementById('notif-icon');
+            const titleEl = document.getElementById('notif-title');
+            const msgEl = document.getElementById('notif-message');
+
+            titleEl.innerText = title;
+            msgEl.innerText = message;
+
+            if (type === 'success') {
+                content.className = "bg-white text-gray-800 px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3 border-l-4 border-green-500";
+                icon.className = "fas fa-check-circle text-2xl text-green-500";
+            } else {
+                content.className = "bg-white text-gray-800 px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3 border-l-4 border-red-500";
+                icon.className = "fas fa-exclamation-circle text-2xl text-red-500";
+            }
+
+            toast.classList.remove('hidden');
+            toast.classList.add('flex');
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-[-20px]', 'opacity-0');
+            }, 10);
+
+            setTimeout(() => {
+                toast.classList.add('hidden');
+                toast.classList.remove('flex');
+            }, 3000);
+        }
+
         function addToCart() {
             const select = document.getElementById('productSelect');
             const qtyInput = document.getElementById('qtyInput');
             const productId = select.value;
 
-            if (!productId) return alert("Please select a product!");
+            if (!productId) {
+                showNotification("Error", "Please select a product first!", "error");
+                return;
+            }
 
             const selectedOption = select.options[select.selectedIndex];
             const name = selectedOption.getAttribute('data-name');
@@ -141,12 +189,18 @@
             const stock = parseInt(selectedOption.getAttribute('data-stock'));
             const qty = parseInt(qtyInput.value);
 
-            if (qty > stock) return alert("Not enough stock!");
+            if (qty > stock) {
+                showNotification("Stock Alert", `Not enough stock! Only ${stock} available.`, "error");
+                return;
+            }
 
             const existingItem = cart.find(item => item.id === productId);
 
             if (existingItem) {
-                if (existingItem.qty + qty > stock) return alert("Not enough stock!");
+                if (existingItem.qty + qty > stock) {
+                    showNotification("Stock Alert", "Cannot add more. Stock limit reached!", "error");
+                    return;
+                }
                 existingItem.qty += qty;
                 existingItem.total = existingItem.qty * price;
             } else {
@@ -160,6 +214,8 @@
             }
 
             renderCart();
+            $('#productSelect').val(null).trigger('change');
+            qtyInput.value = 1;
         }
 
         function removeFromCart(index) {
@@ -195,7 +251,10 @@
         }
 
         function processCheckout() {
-            if (cart.length === 0) return alert("Cart is empty!");
+            if (cart.length === 0) {
+                showNotification("Empty Cart", "Add items to the cart before checkout!", "error");
+                return;
+            }
 
             const total = parseFloat(document.getElementById('grandTotal').innerText);
 
@@ -207,11 +266,17 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert("Bill Saved Successfully!");
-                        window.location.reload();
+                        showNotification("Success!", "Bill Saved Successfully! 🧾", "success");
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 2000);
                     } else {
-                        alert("Error: " + data.message);
+                        showNotification("Error", data.message, "error");
                     }
+                })
+                .catch(error => {
+                    showNotification("System Error", "Something went wrong. Check console.", "error");
+                    console.error('Error:', error);
                 });
         }
     </script>

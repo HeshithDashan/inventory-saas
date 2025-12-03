@@ -72,6 +72,46 @@
         {% endif %}
         {% endwith %}
 
+        {% set ns = namespace(low_stock=0, total_value=0) %}
+        {% for product in products %}
+            {% if product.quantity < 5 %}
+                {% set ns.low_stock = ns.low_stock + 1 %}
+            {% endif %}
+            {% set ns.total_value = ns.total_value + (product.price * product.quantity) %}
+        {% endfor %}
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500 flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm font-bold uppercase tracking-wide" id="lbl-total-items">Total Items</p>
+                    <h3 class="text-3xl font-bold text-gray-800">{{ products|length }}</h3>
+                </div>
+                <div class="bg-blue-100 p-3 rounded-full text-blue-600">
+                    <i class="fas fa-boxes text-xl"></i>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-red-500 flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm font-bold uppercase tracking-wide" id="lbl-low-stock">Low Stock Alerts</p>
+                    <h3 class="text-3xl font-bold text-red-600">{{ ns.low_stock }}</h3>
+                </div>
+                <div class="bg-red-100 p-3 rounded-full text-red-600">
+                    <i class="fas fa-exclamation-triangle text-xl animate-pulse"></i>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500 flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm font-bold uppercase tracking-wide" id="lbl-total-value">Inventory Value</p>
+                    <h3 class="text-3xl font-bold text-green-600">Rs. {{ "%.2f"|format(ns.total_value) }}</h3>
+                </div>
+                <div class="bg-green-100 p-3 rounded-full text-green-600">
+                    <i class="fas fa-coins text-xl"></i>
+                </div>
+            </div>
+        </div>
+
         <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
             <h2 class="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-2">
                 <span id="txt-product-list">Product List</span> 📦
@@ -98,23 +138,28 @@
                     </thead>
                     <tbody class="text-gray-600 text-xs md:text-sm font-light">
                         {% for product in products %}
-                        <tr class="border-b border-gray-200 hover:bg-gray-50 transition duration-150">
+                        <tr class="border-b border-gray-200 transition duration-150 {% if product.quantity < 5 %} bg-red-50 border-l-4 border-red-500 {% else %} hover:bg-gray-50 {% endif %}">
                             <td class="py-3 px-4 md:px-6 font-medium">{{ product.id }}</td>
-                            <td class="py-3 px-4 md:px-6 font-medium text-gray-800">{{ product.name }}</td>
-                            <td class="py-3 px-4 md:px-6 text-red-500 font-semibold">{{
-                                "%.2f"|format(product.cost_price) }}</td>
-                            <td class="py-3 px-4 md:px-6 text-green-600 font-bold">{{ "%.2f"|format(product.price) }}
+                            <td class="py-3 px-4 md:px-6 font-medium text-gray-800">
+                                {{ product.name }}
+                                {% if product.quantity < 5 %}
+                                <span class="ml-2 text-red-500 text-xs font-bold animate-pulse"><i class="fas fa-exclamation-circle"></i> LOW</span>
+                                {% endif %}
                             </td>
+                            <td class="py-3 px-4 md:px-6 text-gray-500 font-semibold">{{ "%.2f"|format(product.cost_price) }}</td>
+                            <td class="py-3 px-4 md:px-6 text-green-600 font-bold">{{ "%.2f"|format(product.price) }}</td>
                             <td class="py-3 px-4 md:px-6">
-                                {% if product.quantity > 0 %}
-                                <span
-                                    class="bg-green-100 text-green-800 py-1 px-2 md:px-3 rounded-full text-xs font-bold whitespace-nowrap shadow-sm border border-green-200">
-                                    {{ product.quantity }} <span class="lbl-instock">In Stock</span>
+                                {% if product.quantity == 0 %}
+                                <span class="bg-red-200 text-red-800 py-1 px-3 rounded-full text-xs font-bold whitespace-nowrap shadow-sm">
+                                    <span class="lbl-outstock">Out of Stock</span>
+                                </span>
+                                {% elif product.quantity < 5 %}
+                                <span class="bg-orange-100 text-orange-800 py-1 px-3 rounded-full text-xs font-bold whitespace-nowrap shadow-sm border border-orange-200">
+                                    {{ product.quantity }} <span class="lbl-lowstock">Low Stock</span>
                                 </span>
                                 {% else %}
-                                <span
-                                    class="bg-red-100 text-red-800 py-1 px-2 md:px-3 rounded-full text-xs font-bold whitespace-nowrap shadow-sm border border-red-200">
-                                    <span class="lbl-outstock">Out of Stock</span>
+                                <span class="bg-green-100 text-green-800 py-1 px-3 rounded-full text-xs font-bold whitespace-nowrap shadow-sm border border-green-200">
+                                    {{ product.quantity }} <span class="lbl-instock">In Stock</span>
                                 </span>
                                 {% endif %}
                             </td>
@@ -199,13 +244,17 @@
                 thQty: "Quantity",
                 thActions: "Actions",
                 inStock: "In Stock",
+                lowStock: "Low Stock",
                 outStock: "Out of Stock",
                 noProducts: "No products found. Add one to get started!",
                 modalTitle: "Delete Product?",
                 modalDesc: "Are you sure you want to delete this product? This action cannot be undone.",
                 btnCancel: "Cancel",
                 btnDelete: "Yes, Delete",
-                langBtn: "සිංහල"
+                langBtn: "සිංහල",
+                totalItems: "Total Items",
+                lowStockAlerts: "Low Stock Alerts",
+                totalValue: "Inventory Value"
             },
             si: {
                 title: "ඉන්වෙන්ට්‍රි පද්ධතිය 🚀",
@@ -222,13 +271,17 @@
                 thQty: "ප්‍රමාණය",
                 thActions: "ක්‍රියා",
                 inStock: "ඇත",
+                lowStock: "අඩුවෙමින් පවතී",
                 outStock: "නැත",
                 noProducts: "බඩු කිසිවක් නැත. අලුත් එකක් එකතු කරන්න!",
                 modalTitle: "බඩුව මකන්නද?",
                 modalDesc: "ඔබට මෙය මැකීමට අවශ්‍ය බව විශ්වාසද? මෙය නැවත ලබාගත නොහැක.",
                 btnCancel: "එපා",
                 btnDelete: "ඔව්, මකන්න",
-                langBtn: "English"
+                langBtn: "English",
+                totalItems: "මුළු බඩු වර්ග",
+                lowStockAlerts: "ඉවර වෙගෙන එන බඩු",
+                totalValue: "මුළු බඩු වටිනාකම"
             }
         };
 
@@ -262,6 +315,11 @@
 
             document.querySelectorAll('.lbl-instock').forEach(el => el.innerText = data.inStock);
             document.querySelectorAll('.lbl-outstock').forEach(el => el.innerText = data.outStock);
+            document.querySelectorAll('.lbl-lowstock').forEach(el => el.innerText = data.lowStock);
+
+            document.getElementById('lbl-total-items').innerText = data.totalItems;
+            document.getElementById('lbl-low-stock').innerText = data.lowStockAlerts;
+            document.getElementById('lbl-total-value').innerText = data.totalValue;
 
             const noProd = document.getElementById('txt-no-products');
             if (noProd) noProd.innerText = data.noProducts;

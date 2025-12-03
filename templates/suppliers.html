@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Suppliers - SaaS Inventory</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-50">
+
+    <nav class="bg-white shadow-md px-4 py-3 md:px-6 md:py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+        <h1 class="text-xl md:text-2xl font-bold text-blue-600 flex items-center gap-2">
+            <i class="fas fa-truck-moving"></i> Suppliers
+        </h1>
+
+        <div class="flex items-center gap-3">
+            <a href="/" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-bold transition">
+                <i class="fas fa-arrow-left"></i> Dashboard
+            </a>
+            <a href="/logout"
+                class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 md:px-4 md:py-2 rounded text-sm font-bold transition flex items-center shadow-sm">
+                Logout <i class="fas fa-sign-out-alt ml-2"></i>
+            </a>
+        </div>
+    </nav>
+
+    <div class="container mx-auto mt-6 md:mt-10 p-4 md:p-6">
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <div id="flash-message"
+            class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6 text-sm flex items-center gap-2 shadow-sm">
+            <i class="fas fa-check-circle"></i> {{ messages[0] }}
+        </div>
+        {% endif %}
+        {% endwith %}
+
+        <div class="bg-white rounded-xl shadow-md p-6 mb-8 border border-gray-200">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <i class="fas fa-user-plus"></i> Add New Supplier
+            </h2>
+            <form action="/suppliers" method="POST" class="flex flex-col md:flex-row gap-4">
+                <input type="text" name="name" placeholder="Supplier Name" required
+                    class="flex-1 p-3 border rounded-lg focus:outline-none focus:border-blue-500 bg-gray-50">
+                <input type="text" name="mobile" placeholder="Mobile Number" required
+                    class="flex-1 p-3 border rounded-lg focus:outline-none focus:border-blue-500 bg-gray-50">
+                <input type="text" name="company" placeholder="Company Name"
+                    class="flex-1 p-3 border rounded-lg focus:outline-none focus:border-blue-500 bg-gray-50">
+                <button type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold transition shadow-md whitespace-nowrap">
+                    <i class="fas fa-save"></i> Save Supplier
+                </button>
+            </form>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[700px]">
+                    <thead>
+                        <tr class="bg-gray-100 text-gray-700 uppercase text-xs md:text-sm leading-normal border-b border-gray-300">
+                            <th class="py-3 px-6 font-bold">ID</th>
+                            <th class="py-3 px-6 font-bold">Supplier Name</th>
+                            <th class="py-3 px-6 font-bold">Mobile</th>
+                            <th class="py-3 px-6 font-bold">Company</th>
+                            <th class="py-3 px-6 font-bold text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-gray-600 text-sm font-light">
+                        {% for supplier in suppliers %}
+                        <tr class="border-b border-gray-200 hover:bg-gray-50 transition">
+                            <td class="py-3 px-6 font-medium">{{ supplier.id }}</td>
+                            <td class="py-3 px-6 font-medium text-gray-800">{{ supplier.name }}</td>
+                            <td class="py-3 px-6">{{ supplier.mobile }}</td>
+                            <td class="py-3 px-6">{{ supplier.company }}</td>
+                            <td class="py-3 px-6 text-center">
+                                <a href="/delete-supplier/{{ supplier.id }}" onclick="return confirm('Are you sure?')"
+                                    class="text-red-500 hover:text-red-700 transform hover:scale-125 transition duration-200">
+                                    <i class="fas fa-trash text-lg"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if not suppliers %}
+            <div class="p-12 text-center text-gray-500">
+                <i class="fas fa-truck-loading text-6xl mb-4 text-gray-300"></i>
+                <p class="text-lg">No suppliers found.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        window.setTimeout(function () {
+            const flashMsg = document.getElementById('flash-message');
+            if (flashMsg) {
+                flashMsg.style.display = 'none';
+            }
+        }, 3000);
+    </script>
+</body>
+</html>

@@ -17,7 +17,7 @@ app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
 app.config['MAIL_USERNAME'] = 'heshithdashan24@gmail.com'
-app.config['MAIL_PASSWORD'] = 'ghfp srlj nbkb yhsu' # මෙතන ඔයාගේ App Password එක තියෙන්න ඕන
+app.config['MAIL_PASSWORD'] = 'ghfp srlj nbkb yhsu'
 app.config['MAIL_DEFAULT_SENDER'] = 'heshithdashan24@gmail.com'
 
 mail = Mail(app)
@@ -44,6 +44,12 @@ class Product(db.Model):
     price = db.Column(db.Float, nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
 
+class Supplier(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(150), nullable=False)
+    mobile = db.Column(db.String(20), nullable=False)
+    company = db.Column(db.String(150), nullable=True)
+
 class Bill(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.DateTime, default=datetime.utcnow)
@@ -66,7 +72,6 @@ def home():
     if search_query:
         products = Product.query.filter(Product.name.ilike(f'%{search_query}%')).all()
     else:
-        # අලුත් බඩු උඩින්ම පෙන්වන්න (Newest First)
         products = Product.query.order_by(Product.id.desc()).all()
     return render_template('dashboard.html', name=current_user.username, products=products)
 
@@ -323,6 +328,32 @@ def settings():
         return redirect(url_for('settings'))
         
     return render_template('settings.html', user=current_user)
+
+@app.route('/suppliers', methods=['GET', 'POST'])
+@login_required
+def suppliers():
+    if request.method == 'POST':
+        name = request.form.get('name')
+        mobile = request.form.get('mobile')
+        company = request.form.get('company')
+        
+        new_supplier = Supplier(name=name, mobile=mobile, company=company)
+        db.session.add(new_supplier)
+        db.session.commit()
+        flash('Supplier added successfully!')
+        return redirect(url_for('suppliers'))
+        
+    suppliers_list = Supplier.query.order_by(Supplier.id.desc()).all()
+    return render_template('suppliers.html', suppliers=suppliers_list)
+
+@app.route('/delete-supplier/<int:id>')
+@login_required
+def delete_supplier(id):
+    supplier = Supplier.query.get_or_404(id)
+    db.session.delete(supplier)
+    db.session.commit()
+    flash('Supplier deleted successfully!')
+    return redirect(url_for('suppliers'))
 
 if __name__ == '__main__':
     with app.app_context():

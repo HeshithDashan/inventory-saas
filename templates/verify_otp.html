@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Verify OTP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+    <div class="bg-white p-8 rounded-lg shadow-lg w-96">
+        <h2 class="text-2xl font-bold mb-6 text-center text-green-600">Enter OTP 📩</h2>
+        <p class="text-xs text-gray-500 text-center mb-4">Check your email (or terminal) for the code.</p>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 text-sm">
+                    {{ messages[0] }}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <div class="mb-6">
+                <input type="number" name="otp" placeholder="Enter 6-digit code" class="w-full px-3 py-2 border rounded text-center text-xl tracking-widest focus:outline-none focus:ring focus:border-green-300" required>
+            </div>
+            <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition">
+                Verify Code
+            </button>
+        </form>
+    </div>
+</body>
+</html>

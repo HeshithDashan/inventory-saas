@@ -1,16 +1,26 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import json
 from collections import defaultdict
+from flask_mail import Mail, Message
+import random
 
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///inventory.db'
 app.config['SECRET_KEY'] = 'sago-secret-key-123'
 
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+app.config['MAIL_USERNAME'] = 'heshithdashan24@gmail.com'
+app.config['MAIL_PASSWORD'] = 'ghfp srlj nbkb yhsu'
+app.config['MAIL_DEFAULT_SENDER'] = 'heshithdashan24@gmail.com'
+
+mail = Mail(app)
 db = SQLAlchemy(app)
 
 login_manager = LoginManager()
@@ -98,6 +108,65 @@ def login():
             flash('Login Failed.')
             
     return render_template('login.html')
+
+@app.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        user = User.query.filter_by(email=email).first()
+        if user:
+            otp = random.randint(100000, 999999)
+            session['reset_otp'] = otp
+            session['reset_email'] = email
+            
+            try:
+                msg = Message('Password Reset Code', recipients=[email])
+                msg.body = f'Your OTP is: {otp}'
+                mail.send(msg)
+                flash('OTP sent to your email!')
+            except Exception as e:
+                print(f"Error: {e}")
+                print(f"DEBUG OTP: {otp}")
+                flash('Email failed. Check terminal for OTP.')
+            
+            return redirect(url_for('verify_otp'))
+        else:
+            flash('Email not found!')
+    return render_template('forgot_password.html')
+
+@app.route('/verify-otp', methods=['GET', 'POST'])
+def verify_otp():
+    if 'reset_otp' not in session:
+        return redirect(url_for('login'))
+    
+    if request.method == 'POST':
+        otp_input = request.form.get('otp')
+        if otp_input and otp_input.isdigit() and int(otp_input) == session.get('reset_otp'):
+            session['verified_reset'] = True
+            return redirect(url_for('reset_new_password'))
+        else:
+            flash('Invalid OTP!')
+    return render_template('verify_otp.html')
+
+@app.route('/reset-new-password', methods=['GET', 'POST'])
+def reset_new_password():
+    if 'verified_reset' not in session:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        password = request.form.get('password')
+        email = session['reset_email']
+        user = User.query.filter_by(email=email).first()
+        if user:
+            user.password = generate_password_hash(password, method='pbkdf2:sha256')
+            db.session.commit()
+            session.pop('reset_otp', None)
+            session.pop('reset_email', None)
+            session.pop('verified_reset', None)
+            flash('Password reset successful!')
+            return redirect(url_for('login'))
+    
+    return render_template('reset_password.html')
 
 @app.route('/logout')
 @login_required

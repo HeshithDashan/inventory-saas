@@ -21,10 +21,15 @@
                 <label class="block text-gray-700 text-sm font-bold mb-2">Username</label>
                 <input type="text" name="username" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-green-300" required>
             </div>
-            <div class="mb-6">
+            <div class="mb-2">
                 <label class="block text-gray-700 text-sm font-bold mb-2">Password</label>
                 <input type="password" name="password" class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-green-300" required>
             </div>
+            
+            <div class="text-right mb-6">
+                <a href="/forgot-password" class="text-xs text-blue-500 hover:text-blue-700 font-bold">Forgot Password?</a>
+            </div>
+
             <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition">
                 Login
             </button>
@@ -38,10 +43,10 @@
         window.setTimeout(function() {
             const flashMsg = document.getElementById('flash-message');
             if (flashMsg) {
-                flashMsg.style.opacity = '0'; 
-                setTimeout(() => flashMsg.remove(), 500); 
+                flashMsg.style.opacity = '0';
+                setTimeout(() => flashMsg.remove(), 500);
             }
-        }, 3000); // 3 Seconds
+        }, 3000);
     </script>
 </body>
 </html>

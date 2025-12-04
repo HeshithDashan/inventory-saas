@@ -1,4 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session
+import os
+import secrets
+from PIL import Image
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session, current_app
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -7,11 +10,13 @@ import json
 from collections import defaultdict
 from flask_mail import Mail, Message
 import random
+from functools import wraps
 
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///inventory.db'
 app.config['SECRET_KEY'] = 'sago-secret-key-123'
+app.config['UPLOAD_FOLDER'] = 'static/profile_pics'
 
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
@@ -31,11 +36,22 @@ login_manager.login_view = 'login'
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if current_user.role != 'admin':
+            flash('You do not have permission to access this page.')
+            return redirect(url_for('home'))
+        return f(*args, **kwargs)
+    return decorated_function
+
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), unique=True, nullable=False)
     email = db.Column(db.String(150), unique=True, nullable=False)
     password = db.Column(db.String(150), nullable=False)
+    role = db.Column(db.String(20), nullable=False, default='cashier')
+    image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
 
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -80,7 +96,7 @@ def home():
         products = Product.query.filter(Product.name.ilike(f'%{search_query}%')).all()
     else:
         products = Product.query.order_by(Product.id.desc()).all()
-    return render_template('dashboard.html', name=current_user.username, products=products)
+    return render_template('dashboard.html', user=current_user, products=products)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -88,6 +104,7 @@ def register():
         username = request.form.get('username')
         email = request.form.get('email')
         password = request.form.get('password')
+        role = request.form.get('role')
 
         user_exists = User.query.filter((User.username == username) | (User.email == email)).first()
 
@@ -97,11 +114,11 @@ def register():
 
         hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
         
-        new_user = User(username=username, email=email, password=hashed_password)
+        new_user = User(username=username, email=email, password=hashed_password, role=role)
         db.session.add(new_user)
         db.session.commit()
         
-        flash('Account created!')
+        flash('Account created! You can now login.')
         return redirect(url_for('login'))
     
     return render_template('register.html')
@@ -139,7 +156,6 @@ def forgot_password():
                 flash('OTP sent to your email!')
             except Exception as e:
                 print(f"Error: {e}")
-                print(f"DEBUG OTP: {otp}")
                 flash('Email failed. Check terminal for OTP.')
             
             return redirect(url_for('verify_otp'))
@@ -225,6 +241,7 @@ def edit_product(id):
 
 @app.route('/delete-product/<int:id>')
 @login_required
+@admin_required
 def delete_product(id):
     product = Product.query.get_or_404(id)
     db.session.delete(product)
@@ -276,8 +293,8 @@ def save_bill():
 
 @app.route('/reports')
 @login_required
+@admin_required
 def reports():
-    # 1. Sales Data
     bills = Bill.query.order_by(Bill.date.desc()).all()
     total_revenue = sum(bill.total_amount for bill in bills)
 
@@ -286,7 +303,6 @@ def reports():
         date_str = bill.date.strftime('%Y-%m-%d')
         sales_data[date_str] += bill.total_amount
 
-    # 2. Expense Data
     expenses = Expense.query.all()
     total_expenses = sum(exp.amount for exp in expenses)
     
@@ -294,10 +310,8 @@ def reports():
     for exp in expenses:
         expense_cats[exp.category] += exp.amount
 
-    # 3. Net Profit
     net_profit = total_revenue - total_expenses
 
-    # 4. Chart Data Preparation
     sorted_dates = sorted(sales_data.keys())
     chart_labels = sorted_dates
     chart_values = [sales_data[date] for date in sorted_dates]
@@ -319,7 +333,20 @@ def reports():
 @login_required
 def view_bill(id):
     bill = Bill.query.get_or_404(id)
-    return render_template('view_bill.html', bill=bill)
+    return render_template('view_bill.html', bill=bill, user=current_user)
+
+def save_picture(form_picture):
+    random_hex = secrets.token_hex(8)
+    _, f_ext = os.path.splitext(form_picture.filename)
+    picture_fn = random_hex + f_ext
+    picture_path = os.path.join(app.root_path, 'static/profile_pics', picture_fn)
+
+    output_size = (125, 125)
+    i = Image.open(form_picture)
+    i.thumbnail(output_size)
+    i.save(picture_path)
+
+    return picture_fn
 
 @app.route('/settings', methods=['GET', 'POST'])
 @login_required
@@ -331,6 +358,10 @@ def settings():
             new_username = request.form.get('username')
             new_email = request.form.get('email')
             
+            if request.files.get('picture'):
+                picture_file = save_picture(request.files['picture'])
+                current_user.image_file = picture_file
+
             existing_user = User.query.filter(((User.username == new_username) | (User.email == new_email)) & (User.id != current_user.id)).first()
             
             if existing_user:
@@ -354,10 +385,12 @@ def settings():
                 
         return redirect(url_for('settings'))
         
-    return render_template('settings.html', user=current_user)
+    image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
+    return render_template('settings.html', user=current_user, image_file=image_file)
 
 @app.route('/suppliers', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def suppliers():
     if request.method == 'POST':
         name = request.form.get('name')
@@ -375,6 +408,7 @@ def suppliers():
 
 @app.route('/delete-supplier/<int:id>')
 @login_required
+@admin_required
 def delete_supplier(id):
     supplier = Supplier.query.get_or_404(id)
     db.session.delete(supplier)
@@ -384,6 +418,7 @@ def delete_supplier(id):
 
 @app.route('/expenses', methods=['GET', 'POST'])
 @login_required
+@admin_required
 def expenses():
     if request.method == 'POST':
         category = request.form.get('category')
@@ -407,6 +442,7 @@ def expenses():
 
 @app.route('/delete-expense/<int:id>')
 @login_required
+@admin_required
 def delete_expense(id):
     expense = Expense.query.get_or_404(id)
     db.session.delete(expense)

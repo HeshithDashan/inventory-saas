@@ -1,65 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <title>Sales Reports - SaaS Inventory</title>
+    <title>Reports - SaaS Inventory</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;700&display=swap');
+        .sinhala-font { font-family: 'Noto Sans Sinhala', sans-serif; }
+    </style>
 </head>
+
 <body class="bg-gray-50">
 
-    <nav class="bg-white shadow-md p-4 flex justify-between items-center">
-        <h1 class="text-xl font-bold text-purple-600">Sales Reports 📈</h1>
-        <a href="/" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm font-bold transition">
-            Back to Dashboard
-        </a>
+    <nav class="bg-white shadow-md px-4 py-3 md:px-6 md:py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+        <h1 class="text-xl md:text-2xl font-bold text-purple-600 flex items-center gap-2">
+            <i class="fas fa-chart-pie"></i> Business Reports
+        </h1>
+
+        <div class="flex flex-col md:flex-row items-center gap-3">
+            <button onclick="toggleLanguage()" id="lang-btn"
+                class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg text-sm font-bold transition border border-gray-300 shadow-sm min-w-[100px] text-center">
+                සිංහල
+            </button>
+            <a href="/" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-bold transition">
+                <i class="fas fa-arrow-left"></i> Dashboard
+            </a>
+            <a href="/logout"
+                class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 md:px-4 md:py-2 rounded text-sm font-bold transition flex items-center shadow-sm">
+                Logout <i class="fas fa-sign-out-alt ml-2"></i>
+            </a>
+        </div>
     </nav>
 
-    <div class="container mx-auto mt-8 p-6">
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div class="bg-white p-6 rounded-lg shadow-md flex flex-col justify-center items-center border-l-4 border-green-500">
-                <h2 class="text-gray-500 font-bold uppercase text-sm mb-2">Total Revenue</h2>
-                <span class="text-4xl font-extrabold text-green-600">Rs. {{ "%.2f"|format(total_revenue) }}</span>
+    <div class="container mx-auto mt-6 md:mt-10 p-4 md:p-6">
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500 flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm font-bold uppercase tracking-wide" id="lbl-revenue">Total Revenue</p>
+                    <h3 class="text-3xl font-bold text-green-600">Rs. {{ "%.2f"|format(total_revenue) }}</h3>
+                </div>
+                <div class="bg-green-100 p-3 rounded-full text-green-600">
+                    <i class="fas fa-coins text-xl"></i>
+                </div>
             </div>
-            
-            <div class="bg-white p-6 rounded-lg shadow-md flex flex-col justify-center items-center border-l-4 border-blue-500">
-                <h2 class="text-gray-500 font-bold uppercase text-sm mb-2">Total Transactions</h2>
-                <span class="text-4xl font-extrabold text-blue-600">{{ bills|length }}</span>
+
+            <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-red-500 flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm font-bold uppercase tracking-wide" id="lbl-expenses">Total Expenses</p>
+                    <h3 class="text-3xl font-bold text-red-600">Rs. {{ "%.2f"|format(total_expenses) }}</h3>
+                </div>
+                <div class="bg-red-100 p-3 rounded-full text-red-600">
+                    <i class="fas fa-file-invoice-dollar text-xl"></i>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500 flex items-center justify-between">
+                <div>
+                    <p class="text-gray-500 text-sm font-bold uppercase tracking-wide" id="lbl-profit">Net Profit</p>
+                    <h3 class="text-3xl font-bold text-blue-600">Rs. {{ "%.2f"|format(net_profit) }}</h3>
+                </div>
+                <div class="bg-blue-100 p-3 rounded-full text-blue-600">
+                    <i class="fas fa-chart-line text-xl"></i>
+                </div>
             </div>
         </div>
 
-        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
-            <h3 class="text-lg font-bold text-gray-700 mb-4 border-b pb-2">Daily Sales Trend 📊</h3>
-            <div class="relative h-72 w-full">
-                <canvas id="salesChart"></canvas>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <h3 class="text-lg font-bold text-gray-800 mb-4" id="chart-sales-title">Sales Trend (Last 7 Days)</h3>
+                <div class="relative h-64 w-full">
+                    <canvas id="salesChart"></canvas>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-xl shadow-md">
+                <h3 class="text-lg font-bold text-gray-800 mb-4" id="chart-exp-title">Expense Distribution</h3>
+                <div class="relative h-64 w-full flex justify-center">
+                    <canvas id="expenseChart"></canvas>
+                </div>
             </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
-            <div class="p-4 border-b bg-gray-100">
-                <h3 class="text-lg font-bold text-gray-700">Transaction History</h3>
-            </div>
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
+            <h3 class="text-lg font-bold text-gray-800 p-6 bg-gray-50 border-b" id="tbl-history">Recent Transaction History</h3>
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
+                <table class="w-full text-left border-collapse min-w-[700px]">
                     <thead>
-                        <tr class="bg-gray-200 text-gray-600 uppercase text-xs font-bold">
-                            <th class="py-3 px-6">Bill ID</th>
-                            <th class="py-3 px-6">Date & Time</th>
-                            <th class="py-3 px-6 text-right">Amount (Rs.)</th>
-                            <th class="py-3 px-6 text-center">Action</th>
+                        <tr class="bg-gray-100 text-gray-700 uppercase text-xs md:text-sm leading-normal border-b border-gray-300">
+                            <th class="py-3 px-6 font-bold">Bill ID</th>
+                            <th class="py-3 px-6 font-bold">Date</th>
+                            <th class="py-3 px-6 font-bold">Total Amount (Rs.)</th>
+                            <th class="py-3 px-6 font-bold text-center">Action</th>
                         </tr>
                     </thead>
-                    <tbody class="text-gray-600 text-sm">
+                    <tbody class="text-gray-600 text-sm font-light">
                         {% for bill in bills %}
                         <tr class="border-b border-gray-200 hover:bg-gray-50 transition">
                             <td class="py-3 px-6 font-medium">#{{ bill.id }}</td>
                             <td class="py-3 px-6">{{ bill.date.strftime('%Y-%m-%d %H:%M') }}</td>
-                            <td class="py-3 px-6 text-right font-bold text-gray-800">{{ "%.2f"|format(bill.total_amount) }}</td>
+                            <td class="py-3 px-6 font-bold text-green-600">{{ "%.2f"|format(bill.total_amount) }}</td>
                             <td class="py-3 px-6 text-center">
-                                <a href="/view-bill/{{ bill.id }}" class="bg-blue-100 text-blue-600 hover:bg-blue-200 px-3 py-1 rounded text-xs font-bold transition">
-                                    <i class="fas fa-eye"></i> View
+                                <a href="/view-bill/{{ bill.id }}" class="bg-blue-100 text-blue-600 py-1 px-3 rounded-full text-xs font-bold hover:bg-blue-200 transition">
+                                    View Receipt
                                 </a>
                             </td>
                         </tr>
@@ -67,88 +112,98 @@
                     </tbody>
                 </table>
             </div>
-            {% if not bills %}
-            <div class="p-8 text-center text-gray-400">
-                No transactions found yet.
-            </div>
-            {% endif %}
         </div>
     </div>
 
-    <div id="chartData" 
-         data-labels='{{ chart_labels | safe }}' 
-         data-values='{{ chart_values | safe }}'
-         class="hidden">
-    </div>
-
     <script>
-        const dataElement = document.getElementById('chartData');
-        const labels = JSON.parse(dataElement.dataset.labels);
-        const dataValues = JSON.parse(dataElement.dataset.values);
+        const salesCtx = document.getElementById('salesChart').getContext('2d');
+        const expenseCtx = document.getElementById('expenseChart').getContext('2d');
 
-        const ctx = document.getElementById('salesChart').getContext('2d');
-        const salesChart = new Chart(ctx, {
+        const salesChart = new Chart(salesCtx, {
             type: 'line',
             data: {
-                labels: labels,
+                labels: JSON.parse('{{ chart_labels | safe }}'),
                 datasets: [{
-                    label: 'Revenue (Rs.)',
-                    data: dataValues,
-                    borderColor: 'rgb(147, 51, 234)', 
-                    backgroundColor: 'rgba(147, 51, 234, 0.1)',
-                    borderWidth: 3,
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: 'rgb(147, 51, 234)',
-                    pointRadius: 5,
-                    pointHoverRadius: 7,
+                    label: 'Sales Revenue',
+                    data: JSON.parse('{{ chart_values | safe }}'),
+                    borderColor: '#10B981',
+                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderWidth: 2,
                     fill: true,
-                    tension: 0.3
+                    tension: 0.4
                 }]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(0,0,0,0.8)',
-                        padding: 10,
-                        callbacks: {
-                            label: function(context) {
-                                let label = context.dataset.label || '';
-                                if (label) {
-                                    label += ': ';
-                                }
-                                if (context.parsed.y !== null) {
-                                    label += 'Rs. ' + context.parsed.y.toFixed(2);
-                                }
-                                return label;
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: {
-                            color: '#f3f4f6'
-                        },
-                        ticks: {
-                            callback: function(value) {
-                                return 'Rs. ' + value;
-                            }
-                        }
-                    },
-                    x: {
-                        grid: {
-                            display: false
-                        }
-                    }
-                }
-            }
+            options: { responsive: true, maintainAspectRatio: false }
         });
+
+        const expLabels = JSON.parse('{{ exp_labels | safe }}');
+        const expValues = JSON.parse('{{ exp_values | safe }}');
+
+        let expenseChart;
+        if (expValues.length > 0) {
+            expenseChart = new Chart(expenseCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: expLabels,
+                    datasets: [{
+                        data: expValues,
+                        backgroundColor: [
+                            '#EF4444', '#F59E0B', '#3B82F6', '#10B981', '#8B5CF6', '#6366F1'
+                        ]
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        } else {
+            document.getElementById('expenseChart').style.display = 'none';
+            const container = document.getElementById('expenseChart').parentNode;
+            const msg = document.createElement('p');
+            msg.textContent = "No expenses recorded yet.";
+            msg.className = "text-center text-gray-500 py-10";
+            container.appendChild(msg);
+        }
+
+        const langData = {
+            en: {
+                revenue: "Total Revenue",
+                expenses: "Total Expenses",
+                profit: "Net Profit",
+                salesTitle: "Sales Trend (Last 7 Days)",
+                expTitle: "Expense Distribution",
+                history: "Recent Transaction History",
+                langBtn: "සිංහල"
+            },
+            si: {
+                revenue: "මුළු ආදායම",
+                expenses: "මුළු වියදම",
+                profit: "ශුද්ධ ලාභය",
+                salesTitle: "විකුණුම් ප්‍රවණතාවය (පසුගිය දින 7)",
+                expTitle: "වියදම් බෙදී යාම",
+                history: "මෑත ගනුදෙනු ඉතිහාසය",
+                langBtn: "English"
+            }
+        };
+
+        let currentLang = 'en';
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'si' : 'en';
+            const data = langData[currentLang];
+
+            document.getElementById('lbl-revenue').innerText = data.revenue;
+            document.getElementById('lbl-expenses').innerText = data.expenses;
+            document.getElementById('lbl-profit').innerText = data.profit;
+            document.getElementById('chart-sales-title').innerText = data.salesTitle;
+            document.getElementById('chart-exp-title').innerText = data.expTitle;
+            document.getElementById('tbl-history').innerText = data.history;
+            document.getElementById('lang-btn').innerText = data.langBtn;
+
+            if (currentLang === 'si') {
+                document.body.classList.add('sinhala-font');
+            } else {
+                document.body.classList.remove('sinhala-font');
+            }
+        }
     </script>
 
 </body>

@@ -277,6 +277,7 @@ def save_bill():
 @app.route('/reports')
 @login_required
 def reports():
+    # 1. Sales Data
     bills = Bill.query.order_by(Bill.date.desc()).all()
     total_revenue = sum(bill.total_amount for bill in bills)
 
@@ -285,15 +286,34 @@ def reports():
         date_str = bill.date.strftime('%Y-%m-%d')
         sales_data[date_str] += bill.total_amount
 
+    # 2. Expense Data
+    expenses = Expense.query.all()
+    total_expenses = sum(exp.amount for exp in expenses)
+    
+    expense_cats = defaultdict(float)
+    for exp in expenses:
+        expense_cats[exp.category] += exp.amount
+
+    # 3. Net Profit
+    net_profit = total_revenue - total_expenses
+
+    # 4. Chart Data Preparation
     sorted_dates = sorted(sales_data.keys())
     chart_labels = sorted_dates
     chart_values = [sales_data[date] for date in sorted_dates]
+    
+    exp_labels = list(expense_cats.keys())
+    exp_values = list(expense_cats.values())
 
     return render_template('reports.html', 
                            bills=bills, 
                            total_revenue=total_revenue,
+                           total_expenses=total_expenses,
+                           net_profit=net_profit,
                            chart_labels=json.dumps(chart_labels),
-                           chart_values=json.dumps(chart_values))
+                           chart_values=json.dumps(chart_values),
+                           exp_labels=json.dumps(exp_labels),
+                           exp_values=json.dumps(exp_values))
 
 @app.route('/view-bill/<int:id>')
 @login_required

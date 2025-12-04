@@ -36,8 +36,17 @@
                 <h2 class="text-xl font-bold mb-4 text-gray-800 border-b pb-2">
                     <i class="fas fa-user-edit text-blue-500 mr-2"></i> Edit Profile
                 </h2>
-                <form method="POST">
+                
+                <form method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="action" value="update_profile">
+
+                    <div class="flex flex-col items-center mb-6">
+                        <img src="{{ image_file }}" class="h-32 w-32 rounded-full border-4 border-blue-100 object-cover mb-4 shadow-sm" alt="Profile Picture">
+                        <label class="cursor-pointer bg-blue-50 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-100 transition font-bold text-sm">
+                            <i class="fas fa-camera mr-2"></i> Change Photo
+                            <input type="file" name="picture" class="hidden">
+                        </label>
+                    </div>
 
                     <div class="mb-4">
                         <label class="block text-gray-700 text-sm font-bold mb-2">Username</label>
@@ -92,7 +101,6 @@
     </div>
 
     <script>
-
         window.setTimeout(function () {
             const flashMsg = document.getElementById('flash-message');
             if (flashMsg) {

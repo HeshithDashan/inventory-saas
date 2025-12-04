@@ -1,47 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Bill Details - SaaS Inventory</title>
+    <title>Bill Receipt</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @media print {
+            body { background-color: white; }
+            nav, .no-print { display: none !important; }
+            .print-container { box-shadow: none; border: none; width: 100%; max-width: 100%; margin: 0; padding: 0; }
+        }
+    </style>
 </head>
-<body class="bg-gray-100 p-10 flex justify-center">
+<body class="bg-gray-100">
 
-    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold text-gray-800">Bill #{{ bill.id }}</h2>
-            <span class="text-gray-500 text-sm">{{ bill.date.strftime('%Y-%m-%d %H:%M') }}</span>
+    <nav class="bg-white shadow-md p-4 mb-6 flex justify-between items-center no-print">
+        <h1 class="text-xl font-bold text-blue-600">Inventory SaaS 🚀</h1>
+        <a href="/" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded font-bold transition">
+            <i class="fas fa-arrow-left"></i> Back
+        </a>
+    </nav>
+
+    <div class="max-w-xl mx-auto bg-white p-8 rounded-lg shadow-lg print-container">
+        
+        <div class="text-center mb-6 border-b pb-4">
+            <h1 class="text-3xl font-bold text-gray-800">MY SHOP NAME</h1>
+            <p class="text-gray-500">No. 123, Main Street, Colombo</p>
+            <p class="text-gray-500">Tel: 011-2345678</p>
         </div>
 
-        <table class="w-full text-left border-collapse mb-6">
+        <div class="flex justify-between mb-4 text-sm text-gray-600">
+            <div>
+                <p><strong>Bill No:</strong> #{{ bill.id }}</p>
+                <p><strong>Date:</strong> {{ bill.date.strftime('%Y-%m-%d %H:%M') }}</p>
+            </div>
+            <div class="text-right">
+                <p><strong>Cashier:</strong> {{ user.username }}</p>
+            </div>
+        </div>
+
+        <table class="w-full mb-6 text-sm">
             <thead>
-                <tr class="border-b-2 border-gray-300">
-                    <th class="py-2">Item</th>
-                    <th class="py-2 text-center">Qty</th>
-                    <th class="py-2 text-right">Price</th>
-                    <th class="py-2 text-right">Total</th>
+                <tr class="border-b-2 border-gray-800">
+                    <th class="text-left py-2">Item</th>
+                    <th class="text-center py-2">Qty</th>
+                    <th class="text-right py-2">Price</th>
+                    <th class="text-right py-2">Total</th>
                 </tr>
             </thead>
             <tbody>
                 {% for item in bill.items %}
-                <tr class="border-b border-gray-100">
+                <tr class="border-b border-gray-200">
                     <td class="py-2">{{ item.product_name }}</td>
-                    <td class="py-2 text-center">{{ item.quantity }}</td>
-                    <td class="py-2 text-right">{{ "%.2f"|format(item.price) }}</td>
-                    <td class="py-2 text-right">{{ "%.2f"|format(item.total) }}</td>
+                    <td class="text-center py-2">{{ item.quantity }}</td>
+                    <td class="text-right py-2">{{ "%.2f"|format(item.price) }}</td>
+                    <td class="text-right py-2 font-bold">{{ "%.2f"|format(item.total) }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
 
-        <div class="flex justify-between items-center border-t-2 border-gray-300 pt-4 mb-6">
-            <h3 class="text-xl font-bold">Grand Total:</h3>
-            <h3 class="text-xl font-bold text-green-600">Rs. {{ "%.2f"|format(bill.total_amount) }}</h3>
+        <div class="flex justify-end mb-6">
+            <div class="text-right">
+                <h2 class="text-2xl font-bold text-gray-800">Total: Rs. {{ "%.2f"|format(bill.total_amount) }}</h2>
+            </div>
         </div>
 
-        <div class="text-center">
-            <a href="/reports" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm font-bold transition">
-                Back to Reports
-            </a>
+        <div class="text-center text-xs text-gray-500 border-t pt-4">
+            <p>Thank you for your business!</p>
+            <p class="mt-1">System by Inventory SaaS 🚀</p>
+        </div>
+
+        <div class="mt-8 text-center no-print">
+            <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-bold shadow-lg flex items-center justify-center gap-2 mx-auto transition transform hover:scale-105">
+                <i class="fas fa-print"></i> Print Receipt
+            </button>
         </div>
     </div>
 

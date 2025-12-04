@@ -50,6 +50,13 @@ class Supplier(db.Model):
     mobile = db.Column(db.String(20), nullable=False)
     company = db.Column(db.String(150), nullable=True)
 
+class Expense(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    category = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.String(200), nullable=True)
+    amount = db.Column(db.Float, nullable=False)
+    date = db.Column(db.DateTime, default=datetime.utcnow)
+
 class Bill(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.DateTime, default=datetime.utcnow)
@@ -354,6 +361,38 @@ def delete_supplier(id):
     db.session.commit()
     flash('Supplier deleted successfully!')
     return redirect(url_for('suppliers'))
+
+@app.route('/expenses', methods=['GET', 'POST'])
+@login_required
+def expenses():
+    if request.method == 'POST':
+        category = request.form.get('category')
+        description = request.form.get('description')
+        amount = request.form.get('amount')
+        date_str = request.form.get('date')
+
+        if date_str:
+            date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+        else:
+            date_obj = datetime.utcnow()
+
+        new_expense = Expense(category=category, description=description, amount=float(amount), date=date_obj)
+        db.session.add(new_expense)
+        db.session.commit()
+        flash('Expense added successfully!')
+        return redirect(url_for('expenses'))
+
+    expenses_list = Expense.query.order_by(Expense.date.desc()).all()
+    return render_template('expenses.html', expenses=expenses_list)
+
+@app.route('/delete-expense/<int:id>')
+@login_required
+def delete_expense(id):
+    expense = Expense.query.get_or_404(id)
+    db.session.delete(expense)
+    db.session.commit()
+    flash('Expense deleted successfully!')
+    return redirect(url_for('expenses'))
 
 if __name__ == '__main__':
     with app.app_context():

@@ -47,6 +47,10 @@
                     class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded text-sm font-bold transition text-center shadow-sm flex items-center gap-1">
                     <i class="fas fa-truck"></i> <span id="btn-suppliers">Suppliers</span>
                 </a>
+                <a href="/expenses"
+                    class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded text-sm font-bold transition text-center shadow-sm flex items-center gap-1">
+                    <i class="fas fa-file-invoice-dollar"></i> <span id="btn-expenses">Expenses</span>
+                </a>
                 <a href="/reports"
                     class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 rounded text-sm font-bold transition text-center shadow-sm flex items-center gap-1">
                     <i class="fas fa-chart-line"></i> <span id="btn-reports">Reports</span>
@@ -239,6 +243,7 @@
                 pos: "POS",
                 reports: "Reports",
                 suppliers: "Suppliers",
+                expenses: "Expenses",
                 hello: "Hello",
                 logout: "Logout",
                 productList: "Product List",
@@ -267,6 +272,7 @@
                 pos: "බිල් දමන්න",
                 reports: "වාර්තා",
                 suppliers: "සැපයුම්කරුවන්",
+                expenses: "වියදම්",
                 hello: "ආයුබෝවන්",
                 logout: "ඉවත් වන්න",
                 productList: "බඩු ලැයිස්තුව",
@@ -302,6 +308,7 @@
             document.getElementById('btn-pos').innerText = data.pos;
             document.getElementById('btn-reports').innerText = data.reports;
             document.getElementById('btn-suppliers').innerText = data.suppliers;
+            document.getElementById('btn-expenses').innerText = data.expenses;
             document.getElementById('txt-hello').innerText = data.hello;
             document.getElementById('btn-logout').innerText = data.logout;
             document.getElementById('txt-product-list').innerText = data.productList;

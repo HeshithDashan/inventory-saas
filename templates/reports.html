@@ -85,7 +85,15 @@
         </div>
 
         <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200">
-            <h3 class="text-lg font-bold text-gray-800 p-6 bg-gray-50 border-b" id="tbl-history">Recent Transaction History</h3>
+            <div class="p-6 bg-gray-50 border-b flex flex-col md:flex-row justify-between items-center gap-4">
+                <h3 class="text-lg font-bold text-gray-800" id="tbl-history">Recent Transaction History</h3>
+                
+                <a href="{{ url_for('export_excel') }}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-bold transition flex items-center gap-2 shadow-sm">
+                    <i class="fas fa-file-excel"></i>
+                    <span id="btn-export">Export to Excel</span>
+                </a>
+            </div>
+
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse min-w-[700px]">
                     <thead>
@@ -171,7 +179,8 @@
                 salesTitle: "Sales Trend (Last 7 Days)",
                 expTitle: "Expense Distribution",
                 history: "Recent Transaction History",
-                langBtn: "සිංහල"
+                langBtn: "සිංහල",
+                exportBtn: "Export to Excel" // Added
             },
             si: {
                 revenue: "මුළු ආදායම",
@@ -180,7 +189,8 @@
                 salesTitle: "විකුණුම් ප්‍රවණතාවය (පසුගිය දින 7)",
                 expTitle: "වියදම් බෙදී යාම",
                 history: "මෑත ගනුදෙනු ඉතිහාසය",
-                langBtn: "English"
+                langBtn: "English",
+                exportBtn: "Excel වෙත ගන්න" // Added
             }
         };
 
@@ -197,6 +207,7 @@
             document.getElementById('chart-exp-title').innerText = data.expTitle;
             document.getElementById('tbl-history').innerText = data.history;
             document.getElementById('lang-btn').innerText = data.langBtn;
+            document.getElementById('btn-export').innerText = data.exportBtn; // Added
 
             if (currentLang === 'si') {
                 document.body.classList.add('sinhala-font');

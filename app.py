@@ -1,7 +1,7 @@
 import os
 import secrets
 from PIL import Image
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session, current_app
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, session, current_app, send_file
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -11,6 +11,8 @@ from collections import defaultdict
 from flask_mail import Mail, Message
 import random
 from functools import wraps
+import pandas as pd
+from io import BytesIO
 
 app = Flask(__name__)
 
@@ -328,6 +330,28 @@ def reports():
                            chart_values=json.dumps(chart_values),
                            exp_labels=json.dumps(exp_labels),
                            exp_values=json.dumps(exp_values))
+
+@app.route('/export-excel')
+@login_required
+@admin_required
+def export_excel():
+    bills = Bill.query.order_by(Bill.date.desc()).all()
+    data = []
+    for bill in bills:
+        data.append({
+            'Bill ID': bill.id,
+            'Date': bill.date.strftime('%Y-%m-%d %H:%M:%S'),
+            'Total Amount': bill.total_amount,
+            'Item Count': len(bill.items)
+        })
+
+    df = pd.DataFrame(data)
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='Sales Report')
+    
+    output.seek(0)
+    return send_file(output, download_name="Sales_Report.xlsx", as_attachment=True)
 
 @app.route('/view-bill/<int:id>')
 @login_required

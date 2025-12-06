@@ -97,7 +97,12 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse min-w-[700px]">
                     <thead>
-                        
+                        <tr class="bg-gray-100 text-gray-700 uppercase text-xs md:text-sm leading-normal border-b border-gray-300">
+                            <th class="py-3 px-6 font-bold">Bill ID</th>
+                            <th class="py-3 px-6 font-bold">Date</th>
+                            <th class="py-3 px-6 font-bold">Total Amount (Rs.)</th>
+                            <th class="py-3 px-6 font-bold text-center">Action</th>
+                        </tr>
                     </thead>
                     <tbody class="text-gray-600 text-sm font-light">
                         {% for bill in bills %}

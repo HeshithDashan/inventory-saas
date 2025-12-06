@@ -81,14 +81,7 @@ class Bill(db.Model):
     total_amount = db.Column(db.Float, nullable=False)
     items = db.relationship('BillItem', backref='bill', lazy=True)
 
-class BillItem(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    bill_id = db.Column(db.Integer, db.ForeignKey('bill.id'), nullable=False)
-    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
-    product_name = db.Column(db.String(150), nullable=False)
-    quantity = db.Column(db.Integer, nullable=False)
-    price = db.Column(db.Float, nullable=False)
-    total = db.Column(db.Float, nullable=False)
+
 
 @app.route('/')
 @login_required

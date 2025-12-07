@@ -50,7 +50,9 @@
     </div>
 
     <nav class="bg-white shadow-md p-4 flex justify-between items-center no-print">
-        <h1 class="text-xl font-bold text-green-600">POS System 🛒</h1>
+        <h1 class="text-xl font-bold text-green-600 flex items-center gap-2">
+            <i class="fas fa-cash-register"></i> POS System
+        </h1>
         <a href="/" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm font-bold transition">
             Back to Dashboard
         </a>
@@ -59,16 +61,28 @@
     <div class="flex flex-1 overflow-hidden">
 
         <div class="w-1/2 p-6 overflow-y-auto no-print">
-            <div class="bg-white p-6 rounded-lg shadow-md">
-                <h2 class="text-xl font-bold mb-4 text-gray-800">Add Items</h2>
+            <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-green-500">
+                <h2 class="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-cart-plus"></i> Add Items
+                </h2>
+
+                <div class="mb-4 bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">
+                        <i class="fas fa-barcode"></i> Scan Barcode / Item Code
+                    </label>
+                    <input type="text" id="barcodeInput" autofocus 
+                        class="w-full px-4 py-2 border-2 border-yellow-400 rounded focus:outline-none focus:ring focus:border-yellow-600 font-mono text-lg tracking-wider" 
+                        placeholder="Scan here...">
+                    <p class="text-xs text-gray-500 mt-1">Cursor auto-focuses here. Just scan!</p>
+                </div>
 
                 <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2">Select Product</label>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Or Select Product Manually</label>
                     <select id="productSelect" class="w-full border rounded p-2">
                         <option value="">Search Product...</option>
                         {% for product in products %}
                         <option value="{{ product.id }}" data-price="{{ product.price }}"
-                            data-stock="{{ product.quantity }}" data-name="{{ product.name }}">
+                            data-stock="{{ product.quantity }}" data-name="{{ product.name }}" data-barcode="{{ product.barcode }}">
                             {{ product.name }} - Rs. {{ product.price }} (Stock: {{ product.quantity }})
                         </option>
                         {% endfor %}
@@ -83,8 +97,8 @@
                 </div>
 
                 <button onclick="addToCart()"
-                    class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded transition">
-                    Add to Bill
+                    class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded transition shadow-md">
+                    <i class="fas fa-plus-circle"></i> Add to Bill
                 </button>
             </div>
         </div>
@@ -92,38 +106,42 @@
         <div class="w-1/2 p-6 bg-gray-200 overflow-y-auto">
             <div id="invoice-area" class="bg-white p-8 rounded-lg shadow-lg min-h-[500px]">
                 <div class="text-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-800">INVOICE</h2>
-                    <p class="text-gray-500">Date: <span id="billDate"></span></p>
+                    <h2 class="text-3xl font-bold text-gray-800 tracking-wider">INVOICE</h2>
+                    <p class="text-gray-500 mt-1">Date: <span id="billDate" class="font-medium text-gray-700"></span></p>
                 </div>
 
                 <table class="w-full text-left border-collapse mb-6">
                     <thead>
-                        <tr class="border-b-2 border-gray-300">
-                            <th class="py-2">Item</th>
-                            <th class="py-2 text-center">Qty</th>
-                            <th class="py-2 text-right">Price</th>
-                            <th class="py-2 text-right">Total</th>
-                            <th class="py-2 text-center no-print">Action</th>
+                        <tr class="border-b-2 border-gray-800">
+                            <th class="py-2 text-sm uppercase text-gray-600">Item</th>
+                            <th class="py-2 text-center text-sm uppercase text-gray-600">Qty</th>
+                            <th class="py-2 text-right text-sm uppercase text-gray-600">Price</th>
+                            <th class="py-2 text-right text-sm uppercase text-gray-600">Total</th>
+                            <th class="py-2 text-center no-print text-sm uppercase text-gray-600">Action</th>
                         </tr>
                     </thead>
-                    <tbody id="cartItems">
+                    <tbody id="cartItems" class="text-gray-700 font-medium text-sm">
 
                     </tbody>
                 </table>
 
-                <div class="flex justify-between items-center border-t-2 border-gray-300 pt-4">
+                <div class="flex justify-between items-center border-t-2 border-gray-800 pt-4 mt-10">
                     <h3 class="text-xl font-bold">Total Amount:</h3>
-                    <h3 class="text-xl font-bold text-green-600">Rs. <span id="grandTotal">0.00</span></h3>
+                    <h3 class="text-2xl font-bold text-gray-900">Rs. <span id="grandTotal">0.00</span></h3>
+                </div>
+                
+                <div class="text-center mt-8 text-xs text-gray-400">
+                    <p>Thank you for your business!</p>
                 </div>
             </div>
 
             <div class="mt-4 flex gap-2 no-print">
                 <button onclick="processCheckout()"
-                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded transition">
-                    Checkout & Save
+                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded transition shadow-md flex justify-center gap-2 items-center">
+                    <i class="fas fa-save"></i> Checkout & Save
                 </button>
                 <button onclick="window.print()"
-                    class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded transition">
+                    class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded transition shadow-md">
                     <i class="fas fa-print"></i>
                 </button>
             </div>
@@ -134,11 +152,56 @@
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <script>
+        const allProducts = JSON.parse('{{ products_json | safe }}');
 
         $(document).ready(function () {
             $('#productSelect').select2();
             document.getElementById('billDate').innerText = new Date().toLocaleDateString();
+            
+            $('#barcodeInput').focus();
+            
+            $('body').click(function(e) {
+                if(!$(e.target).closest('input, select, button, .select2').length) {
+                    $('#barcodeInput').focus();
+                }
+            });
         });
+
+        let barcodeBuffer = "";
+        let scanTimeout;
+
+        $('#barcodeInput').on('input', function() {
+            const code = $(this).val().trim();
+            if(code.length > 0) {
+                 clearTimeout(scanTimeout);
+                 scanTimeout = setTimeout(() => {
+                     handleScan(code);
+                     $(this).val(''); 
+                 }, 200); 
+            }
+        });
+
+        $('#barcodeInput').on('keypress', function(e) {
+            if(e.which === 13) {
+                e.preventDefault();
+                const code = $(this).val().trim();
+                handleScan(code);
+                $(this).val('');
+            }
+        });
+
+        function handleScan(code) {
+            if(!code) return;
+
+            const product = allProducts.find(p => p.barcode === code);
+
+            if(product) {
+                addDirectToCart(product);
+                showNotification("Scanned!", `Added: ${product.name}`, "success");
+            } else {
+                showNotification("Not Found", `Barcode '${code}' not found!`, "error");
+            }
+        }
 
         let cart = [];
 
@@ -171,6 +234,36 @@
                 toast.classList.add('hidden');
                 toast.classList.remove('flex');
             }, 3000);
+        }
+
+        function addDirectToCart(product) {
+             const qty = 1;
+
+            if (qty > product.stock) {
+                showNotification("Stock Alert", `Not enough stock! Only ${product.stock} available.`, "error");
+                return;
+            }
+
+            const existingItem = cart.find(item => item.id == product.id);
+
+            if (existingItem) {
+                if (existingItem.qty + qty > product.stock) {
+                    showNotification("Stock Alert", "Cannot add more. Stock limit reached!", "error");
+                    return;
+                }
+                existingItem.qty += qty;
+                existingItem.total = existingItem.qty * product.price;
+            } else {
+                cart.push({
+                    id: product.id.toString(),
+                    name: product.name,
+                    price: product.price,
+                    qty: qty,
+                    total: product.price * qty
+                });
+            }
+
+            renderCart();
         }
 
         function addToCart() {
@@ -216,6 +309,8 @@
             renderCart();
             $('#productSelect').val(null).trigger('change');
             qtyInput.value = 1;
+            
+            $('#barcodeInput').focus();
         }
 
         function removeFromCart(index) {
@@ -238,7 +333,7 @@
                         <td class="py-2 text-right">${item.price.toFixed(2)}</td>
                         <td class="py-2 text-right">${item.total.toFixed(2)}</td>
                         <td class="py-2 text-center no-print">
-                            <button onclick="removeFromCart(${index})" class="text-red-500 hover:text-red-700">
+                            <button onclick="removeFromCart(${index})" class="text-red-500 hover:text-red-700 transition transform hover:scale-110">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </td>

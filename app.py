@@ -61,6 +61,7 @@ class Product(db.Model):
     cost_price = db.Column(db.Float, nullable=False)
     price = db.Column(db.Float, nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
+    barcode = db.Column(db.String(50), nullable=True)  # ✅ New Barcode Field Added
 
 class Supplier(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -95,7 +96,11 @@ class BillItem(db.Model):
 def home():
     search_query = request.args.get('search')
     if search_query:
-        products = Product.query.filter(Product.name.ilike(f'%{search_query}%')).all()
+        # ✅ Searching by Name OR Barcode
+        products = Product.query.filter(
+            (Product.name.ilike(f'%{search_query}%')) | 
+            (Product.barcode.ilike(f'%{search_query}%'))
+        ).all()
     else:
         products = Product.query.order_by(Product.id.desc()).all()
     return render_template('dashboard.html', user=current_user, products=products)
@@ -210,11 +215,18 @@ def logout():
 def add_product():
     if request.method == 'POST':
         name = request.form.get('name')
+        barcode = request.form.get('barcode')  # ✅ Saving Barcode
         cost_price = request.form.get('cost_price')
         price = request.form.get('price')
         quantity = request.form.get('quantity')
 
-        new_product = Product(name=name, cost_price=float(cost_price), price=float(price), quantity=int(quantity))
+        new_product = Product(
+            name=name, 
+            barcode=barcode,  # ✅ Saving Barcode
+            cost_price=float(cost_price), 
+            price=float(price), 
+            quantity=int(quantity)
+        )
         
         db.session.add(new_product)
         db.session.commit()
@@ -231,6 +243,7 @@ def edit_product(id):
 
     if request.method == 'POST':
         product.name = request.form.get('name')
+        product.barcode = request.form.get('barcode')  # ✅ Updating Barcode
         product.cost_price = float(request.form.get('cost_price'))
         product.price = float(request.form.get('price'))
         product.quantity = int(request.form.get('quantity'))
@@ -255,7 +268,8 @@ def delete_product(id):
 @login_required
 def billing():
     products = Product.query.all()
-    products_json = [{'id': p.id, 'name': p.name, 'price': p.price, 'stock': p.quantity} for p in products]
+    # ✅ Sending barcode to frontend for scanning
+    products_json = [{'id': p.id, 'name': p.name, 'price': p.price, 'stock': p.quantity, 'barcode': p.barcode} for p in products]
     return render_template('billing.html', products=products, products_json=json.dumps(products_json))
 
 @app.route('/save-bill', methods=['POST'])

@@ -38,6 +38,19 @@ login_manager.login_view = 'login'
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+@app.context_processor
+def inject_store_details():
+    store = StoreSettings.query.first()
+    if not store:
+        store = {
+            'shop_name': 'My Shop',
+            'address': '',
+            'phone': '',
+            'header_text': 'Welcome',
+            'footer_text': 'Thank You'
+        }
+    return dict(store=store)
+
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -61,7 +74,7 @@ class Product(db.Model):
     cost_price = db.Column(db.Float, nullable=False)
     price = db.Column(db.Float, nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
-    barcode = db.Column(db.String(50), nullable=True)  # ✅ New Barcode Field Added
+    barcode = db.Column(db.String(50), nullable=True)
 
 class Supplier(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -91,12 +104,19 @@ class BillItem(db.Model):
     price = db.Column(db.Float, nullable=False)
     total = db.Column(db.Float, nullable=False)
 
+class StoreSettings(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    shop_name = db.Column(db.String(150), nullable=True)
+    address = db.Column(db.String(250), nullable=True)
+    phone = db.Column(db.String(50), nullable=True)
+    header_text = db.Column(db.String(100), nullable=True)
+    footer_text = db.Column(db.String(100), nullable=True)
+
 @app.route('/')
 @login_required
 def home():
     search_query = request.args.get('search')
     if search_query:
-        # ✅ Searching by Name OR Barcode
         products = Product.query.filter(
             (Product.name.ilike(f'%{search_query}%')) | 
             (Product.barcode.ilike(f'%{search_query}%'))
@@ -215,14 +235,14 @@ def logout():
 def add_product():
     if request.method == 'POST':
         name = request.form.get('name')
-        barcode = request.form.get('barcode')  # ✅ Saving Barcode
+        barcode = request.form.get('barcode')
         cost_price = request.form.get('cost_price')
         price = request.form.get('price')
         quantity = request.form.get('quantity')
 
         new_product = Product(
             name=name, 
-            barcode=barcode,  # ✅ Saving Barcode
+            barcode=barcode,
             cost_price=float(cost_price), 
             price=float(price), 
             quantity=int(quantity)
@@ -243,7 +263,7 @@ def edit_product(id):
 
     if request.method == 'POST':
         product.name = request.form.get('name')
-        product.barcode = request.form.get('barcode')  # ✅ Updating Barcode
+        product.barcode = request.form.get('barcode')
         product.cost_price = float(request.form.get('cost_price'))
         product.price = float(request.form.get('price'))
         product.quantity = int(request.form.get('quantity'))
@@ -268,7 +288,6 @@ def delete_product(id):
 @login_required
 def billing():
     products = Product.query.all()
-    # ✅ Sending barcode to frontend for scanning
     products_json = [{'id': p.id, 'name': p.name, 'price': p.price, 'stock': p.quantity, 'barcode': p.barcode} for p in products]
     return render_template('billing.html', products=products, products_json=json.dumps(products_json))
 
@@ -389,6 +408,12 @@ def save_picture(form_picture):
 @app.route('/settings', methods=['GET', 'POST'])
 @login_required
 def settings():
+    store = StoreSettings.query.first()
+    if not store:
+        store = StoreSettings(shop_name="My Shop", address="", phone="", header_text="Welcome", footer_text="Thank you")
+        db.session.add(store)
+        db.session.commit()
+
     if request.method == 'POST':
         action = request.form.get('action')
 
@@ -420,11 +445,24 @@ def settings():
                 current_user.password = generate_password_hash(new_password, method='pbkdf2:sha256')
                 db.session.commit()
                 flash('Password changed successfully!')
+        
+        elif action == 'update_store':
+            if current_user.role != 'admin':
+                flash('Only admins can change store settings!')
+            else:
+                store.shop_name = request.form.get('shop_name')
+                store.address = request.form.get('address')
+                store.phone = request.form.get('phone')
+                store.header_text = request.form.get('header_text')
+                store.footer_text = request.form.get('footer_text')
+                
+                db.session.commit()
+                flash('Store settings updated successfully!')
                 
         return redirect(url_for('settings'))
         
     image_file = url_for('static', filename='profile_pics/' + current_user.image_file)
-    return render_template('settings.html', user=current_user, image_file=image_file)
+    return render_template('settings.html', user=current_user, image_file=image_file, store=store)
 
 @app.route('/suppliers', methods=['GET', 'POST'])
 @login_required

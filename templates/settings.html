@@ -12,7 +12,7 @@
 
     <nav class="bg-white shadow-md p-4 flex justify-between items-center">
         <h1 class="text-xl font-bold text-gray-700 flex items-center gap-2">
-            <i class="fas fa-cog"></i> User Settings
+            <i class="fas fa-cog"></i> Settings
         </h1>
         <a href="/" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm font-bold transition">
             Back to Dashboard
@@ -32,70 +32,132 @@
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
 
-            <div class="bg-white p-6 rounded-lg shadow-md h-fit">
-                <h2 class="text-xl font-bold mb-4 text-gray-800 border-b pb-2">
-                    <i class="fas fa-user-edit text-blue-500 mr-2"></i> Edit Profile
-                </h2>
-                
-                <form method="POST" enctype="multipart/form-data">
-                    <input type="hidden" name="action" value="update_profile">
+            <div class="space-y-8">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-xl font-bold mb-4 text-gray-800 border-b pb-2">
+                        <i class="fas fa-user-edit text-blue-500 mr-2"></i> Edit Profile
+                    </h2>
+                    
+                    <form method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="action" value="update_profile">
 
-                    <div class="flex flex-col items-center mb-6">
-                        <img src="{{ image_file }}" class="h-32 w-32 rounded-full border-4 border-blue-100 object-cover mb-4 shadow-sm" alt="Profile Picture">
-                        <label class="cursor-pointer bg-blue-50 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-100 transition font-bold text-sm">
-                            <i class="fas fa-camera mr-2"></i> Change Photo
-                            <input type="file" name="picture" class="hidden">
-                        </label>
-                    </div>
+                        <div class="flex flex-col items-center mb-6">
+                            <img src="{{ image_file }}" class="h-32 w-32 rounded-full border-4 border-blue-100 object-cover mb-4 shadow-sm" alt="Profile Picture">
+                            <label class="cursor-pointer bg-blue-50 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-100 transition font-bold text-sm">
+                                <i class="fas fa-camera mr-2"></i> Change Photo
+                                <input type="file" name="picture" class="hidden">
+                            </label>
+                        </div>
 
-                    <div class="mb-4">
-                        <label class="block text-gray-700 text-sm font-bold mb-2">Username</label>
-                        <input type="text" name="username" value="{{ user.username }}"
-                            class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
-                            required>
-                    </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Username</label>
+                            <input type="text" name="username" value="{{ user.username }}"
+                                class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
+                                required>
+                        </div>
 
-                    <div class="mb-6">
-                        <label class="block text-gray-700 text-sm font-bold mb-2">Email Address</label>
-                        <input type="email" name="email" value="{{ user.email }}"
-                            class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
-                            required>
-                    </div>
+                        <div class="mb-6">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Email Address</label>
+                            <input type="email" name="email" value="{{ user.email }}"
+                                class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-blue-300"
+                                required>
+                        </div>
 
-                    <button type="submit"
-                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition">
-                        Save Changes
-                    </button>
-                </form>
+                        <button type="submit"
+                            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition">
+                            Save Changes
+                        </button>
+                    </form>
+                </div>
+
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <h2 class="text-xl font-bold mb-4 text-gray-800 border-b pb-2">
+                        <i class="fas fa-lock text-red-500 mr-2"></i> Change Password
+                    </h2>
+                    <form method="POST">
+                        <input type="hidden" name="action" value="change_password">
+
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Current Password</label>
+                            <input type="password" name="current_password"
+                                class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-red-300"
+                                required>
+                        </div>
+
+                        <div class="mb-6">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">New Password</label>
+                            <input type="password" name="new_password"
+                                class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-red-300"
+                                required>
+                        </div>
+
+                        <button type="submit"
+                            class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition">
+                            Update Password
+                        </button>
+                    </form>
+                </div>
             </div>
 
-            <div class="bg-white p-6 rounded-lg shadow-md h-fit">
-                <h2 class="text-xl font-bold mb-4 text-gray-800 border-b pb-2">
-                    <i class="fas fa-lock text-red-500 mr-2"></i> Change Password
-                </h2>
-                <form method="POST">
-                    <input type="hidden" name="action" value="change_password">
+            {% if user.role == 'admin' %}
+            <div class="h-fit">
+                <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-purple-500">
+                    <h2 class="text-xl font-bold mb-4 text-gray-800 border-b pb-2 flex items-center gap-2">
+                        <i class="fas fa-store text-purple-600"></i> Shop Settings
+                    </h2>
+                    
+                    <form method="POST">
+                        <input type="hidden" name="action" value="update_store">
 
-                    <div class="mb-4">
-                        <label class="block text-gray-700 text-sm font-bold mb-2">Current Password</label>
-                        <input type="password" name="current_password"
-                            class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-red-300"
-                            required>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Shop Name</label>
+                            <input type="text" name="shop_name" value="{{ store.shop_name }}"
+                                class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-purple-300 font-bold"
+                                placeholder="Ex: Super Mart">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Address</label>
+                            <input type="text" name="address" value="{{ store.address }}"
+                                class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-purple-300"
+                                placeholder="Ex: No. 123, Colombo">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-bold mb-2">Phone Number</label>
+                            <input type="text" name="phone" value="{{ store.phone }}"
+                                class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-purple-300"
+                                placeholder="Ex: 077-1234567">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <label class="block text-gray-700 text-xs font-bold mb-2">Bill Header</label>
+                                <input type="text" name="header_text" value="{{ store.header_text }}"
+                                    class="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring focus:border-purple-300"
+                                    placeholder="Welcome">
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 text-xs font-bold mb-2">Bill Footer</label>
+                                <input type="text" name="footer_text" value="{{ store.footer_text }}"
+                                    class="w-full px-3 py-2 border rounded text-sm focus:outline-none focus:ring focus:border-purple-300"
+                                    placeholder="Thank You">
+                            </div>
+                        </div>
+
+                        <button type="submit"
+                            class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded transition shadow-md">
+                            <i class="fas fa-save mr-2"></i> Save Shop Details
+                        </button>
+                    </form>
+
+                    <div class="mt-4 bg-purple-50 p-3 rounded text-xs text-purple-800 border border-purple-200 flex gap-2">
+                        <i class="fas fa-info-circle mt-0.5"></i>
+                        <span>These details will automatically appear on your printed receipts.</span>
                     </div>
-
-                    <div class="mb-6">
-                        <label class="block text-gray-700 text-sm font-bold mb-2">New Password</label>
-                        <input type="password" name="new_password"
-                            class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-red-300"
-                            required>
-                    </div>
-
-                    <button type="submit"
-                        class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition">
-                        Update Password
-                    </button>
-                </form>
+                </div>
             </div>
+            {% endif %}
 
         </div>
     </div>

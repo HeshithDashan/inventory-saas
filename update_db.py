@@ -9,11 +9,20 @@ if os.path.exists(db_path):
 
     try:
 
-        cursor.execute("ALTER TABLE product ADD COLUMN barcode TEXT")
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS store_settings (
+                id INTEGER PRIMARY KEY,
+                shop_name TEXT,
+                address TEXT,
+                phone TEXT,
+                header_text TEXT,
+                footer_text TEXT
+            )
+        ''')
         conn.commit()
-        print(f"✅ Barcode column added successfully to {db_path}!")
-    except sqlite3.OperationalError:
-        print("⚠️ Barcode column already exists or error occurred.")
+        print(f"✅ Store Settings table added successfully to {db_path}!")
+    except sqlite3.OperationalError as e:
+        print(f"⚠️ Error: {e}")
 
     conn.close()
 else:

@@ -163,7 +163,13 @@
     </div>
 
     <script>
-        
+        window.setTimeout(function () {
+            const flashMsg = document.getElementById('flash-message');
+            if (flashMsg) {
+                flashMsg.style.opacity = '0';
+                setTimeout(() => flashMsg.remove(), 500);
+            }
+        }, 3000);
     </script>
 
 </body>

@@ -26,4 +26,4 @@ if os.path.exists(db_path):
 
     conn.close()
 else:
-    print(f"❌ Error:  {db_path}")
+    print(f"❌ Error: Database not found at {db_path}")

@@ -386,6 +386,14 @@ def export_excel():
     output.seek(0)
     return send_file(output, download_name="Sales_Report.xlsx", as_attachment=True)
 
+@app.route('/backup')
+@login_required
+@admin_required
+def backup_database():
+    db_path = os.path.join(app.instance_path, 'inventory.db')
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    return send_file(db_path, as_attachment=True, download_name=f"backup_{timestamp}.db")
+
 @app.route('/view-bill/<int:id>')
 @login_required
 def view_bill(id):

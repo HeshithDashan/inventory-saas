@@ -100,7 +100,7 @@
             </div>
 
             {% if user.role == 'admin' %}
-            <div class="h-fit">
+            <div class="h-fit space-y-8">
                 <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-purple-500">
                     <h2 class="text-xl font-bold mb-4 text-gray-800 border-b pb-2 flex items-center gap-2">
                         <i class="fas fa-store text-purple-600"></i> Shop Settings
@@ -157,18 +157,36 @@
                     </div>
                 </div>
 
-                <div class="mt-8 bg-white p-6 rounded-lg shadow-md border-t-4 border-gray-600">
+                <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-gray-600">
                     <h2 class="text-xl font-bold mb-4 text-gray-800 border-b pb-2 flex items-center gap-2">
                         <i class="fas fa-database text-gray-600"></i> Database Management
                     </h2>
-                    <div class="flex justify-between items-center">
+                    
+                    <div class="flex justify-between items-center mb-6 pb-6 border-b border-gray-200">
                         <div>
                             <p class="text-gray-700 font-bold">Backup Data</p>
-                            <p class="text-sm text-gray-500">Download a copy of your inventory data to keep it safe.</p>
+                            <p class="text-sm text-gray-500">Download a copy of your inventory data.</p>
                         </div>
                         <a href="/backup" class="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-6 rounded shadow-md transition flex items-center gap-2">
                             <i class="fas fa-download"></i> Download
                         </a>
+                    </div>
+
+                    <div>
+                        <p class="text-gray-700 font-bold mb-2 text-red-600 flex items-center gap-2">
+                            <i class="fas fa-exclamation-triangle"></i> Restore Data
+                        </p>
+                        <p class="text-sm text-gray-500 mb-4">Upload a backup file (.db) to restore. <br><b>Warning:</b> This will replace all current data!</p>
+                        
+                        <form action="/restore" method="POST" enctype="multipart/form-data" class="flex gap-2 items-center">
+                            <input type="file" name="backup_file" accept=".db" required 
+                                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+                            
+                            <button type="submit" onclick="return confirm('⚠️ Are you sure? Current data will be replaced!')" 
+                                class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded shadow-md transition flex items-center gap-2 whitespace-nowrap">
+                                <i class="fas fa-upload"></i> Restore
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>

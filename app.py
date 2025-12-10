@@ -311,14 +311,7 @@ def save_bill():
             if product.quantity >= item['qty']:
                 product.quantity -= item['qty']
                 
-                bill_item = BillItem(
-                    bill_id=new_bill.id,
-                    product_id=product.id,
-                    product_name=product.name,
-                    quantity=item['qty'],
-                    price=item['price'],
-                    total=item['total']
-                )
+                
                 db.session.add(bill_item)
             else:
                 return jsonify({'success': False, 'message': f'Not enough stock for {product.name}'})

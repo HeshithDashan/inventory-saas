@@ -394,6 +394,32 @@ def backup_database():
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     return send_file(db_path, as_attachment=True, download_name=f"backup_{timestamp}.db")
 
+@app.route('/restore', methods=['POST'])
+@login_required
+@admin_required
+def restore_backup():
+    if 'backup_file' not in request.files:
+        flash('No file part', 'error')
+        return redirect(url_for('settings'))
+    
+    file = request.files['backup_file']
+    
+    if file.filename == '':
+        flash('No selected file', 'error')
+        return redirect(url_for('settings'))
+
+    if file:
+        try:
+            db_path = os.path.join(app.instance_path, 'inventory.db')
+            file.save(db_path)
+            flash('Database restored successfully! Please log in again.', 'success')
+            return redirect(url_for('settings'))
+        except Exception as e:
+            flash(f'Error restoring database: {str(e)}', 'error')
+            return redirect(url_for('settings'))
+            
+    return redirect(url_for('settings'))
+
 @app.route('/view-bill/<int:id>')
 @login_required
 def view_bill(id):

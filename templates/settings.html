@@ -158,47 +158,72 @@
                     </div>
                 </div>
 
-                <div class="bg-white p-6 rounded-lg shadow-md border-t-4 border-gray-600">
-                    <h2 class="text-xl font-bold mb-4 text-gray-800 border-b pb-2 flex items-center gap-2">
-                        <i class="fas fa-database text-gray-600"></i> Database Management
-                    </h2>
-                    
-                    <div class="flex justify-between items-center mb-6 pb-6 border-b border-gray-200">
-                        <div>
-                            <p class="text-gray-700 font-bold">Backup Data</p>
-                            <p class="text-sm text-gray-500">Download a copy of your inventory data.</p>
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 mt-8">
+                    <div class="p-6 bg-gray-50 border-b border-gray-100 flex items-center gap-3">
+                        <div class="p-2 bg-indigo-100 rounded-lg text-indigo-600">
+                            <i class="fas fa-database text-xl"></i>
                         </div>
-                        <a href="/backup" class="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-6 rounded shadow-md transition flex items-center gap-2">
-                            <i class="fas fa-download"></i> Download
-                        </a>
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-800">Database Management</h2>
+                            <p class="text-xs text-gray-500 font-medium">Manage your system data securely</p>
+                        </div>
                     </div>
 
-                    <div>
-                        <p class="text-gray-700 font-bold mb-2 text-red-600 flex items-center gap-2">
-                            <i class="fas fa-exclamation-triangle"></i> Restore Data
-                        </p>
-                        <p class="text-sm text-gray-500 mb-4">Upload a backup file (.db) to restore. <br><b>Warning:</b> This will replace all current data!</p>
+                    <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
                         
-                        <form action="/restore" method="POST" enctype="multipart/form-data" class="flex gap-2 items-center" id="restoreForm">
-                            <input type="file" name="backup_file" accept=".db" required 
-                                class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
-                            
-                            <button type="button" onclick="confirmRestore()"
-                                class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded shadow-md transition flex items-center gap-2 whitespace-nowrap">
-                                <i class="fas fa-upload"></i> Restore
-                            </button>
-                        </form>
+                        <div class="relative group">
+                            <div class="absolute inset-0 bg-blue-100 rounded-2xl transform rotate-1 transition-transform group-hover:rotate-2 opacity-50"></div>
+                            <div class="relative bg-white border-2 border-blue-100 p-6 rounded-2xl shadow-sm hover:shadow-md transition-all h-full flex flex-col items-center text-center">
+                                <div class="h-16 w-16 bg-blue-50 rounded-full flex items-center justify-center mb-4 text-blue-500 text-2xl group-hover:scale-110 transition-transform">
+                                    <i class="fas fa-cloud-download-alt"></i>
+                                </div>
+                                <h3 class="text-lg font-bold text-gray-700 mb-2">Backup Data</h3>
+                                <p class="text-sm text-gray-500 mb-6">Download a complete copy of your inventory database.</p>
+                                
+                                <a href="/backup" class="mt-auto w-full py-3 px-6 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg hover:shadow-blue-500/30 transition-all flex items-center justify-center gap-2 transform active:scale-95">
+                                    <i class="fas fa-download"></i> Download Backup
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="relative group">
+                            <div class="absolute inset-0 bg-red-100 rounded-2xl transform -rotate-1 transition-transform group-hover:-rotate-2 opacity-50"></div>
+                            <div class="relative bg-white border-2 border-red-100 p-6 rounded-2xl shadow-sm hover:shadow-md transition-all h-full flex flex-col items-center text-center">
+                                <div class="h-16 w-16 bg-red-50 rounded-full flex items-center justify-center mb-4 text-red-500 text-2xl group-hover:scale-110 transition-transform">
+                                    <i class="fas fa-history"></i>
+                                </div>
+                                <h3 class="text-lg font-bold text-gray-700 mb-2">Restore Data</h3>
+                                <p class="text-sm text-gray-500 mb-6">Upload a backup file (.db) to replace current data. <span class="text-red-500 font-bold">Be Careful!</span></p>
+                                
+                                <form action="/restore" method="POST" enctype="multipart/form-data" id="restoreForm" class="w-full mt-auto">
+                                    <div class="relative mb-3">
+                                        <input type="file" name="backup_file" id="file-upload" accept=".db" class="hidden" onchange="updateFileName()">
+                                        <label for="file-upload" class="cursor-pointer flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-red-300 rounded-xl bg-red-50 hover:bg-red-100 transition-colors">
+                                            <div class="flex flex-col items-center justify-center pt-2 pb-3">
+                                                <i class="fas fa-file-upload text-red-400 mb-1"></i>
+                                                <p class="text-xs text-gray-500" id="file-name-display">Click to select backup file</p>
+                                            </div>
+                                        </label>
+                                    </div>
+
+                                    <button type="button" onclick="confirmRestore()" class="w-full py-3 px-6 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg hover:shadow-red-500/30 transition-all flex items-center justify-center gap-2 transform active:scale-95">
+                                        <i class="fas fa-sync-alt"></i> Restore Now
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
-            </div>
+                </div>
             {% endif %}
 
         </div>
     </div>
 
     <script>
-
-window.setTimeout(function () {
+        // Flash message hiding logic
+        window.setTimeout(function () {
             const flashMsg = document.getElementById('flash-message');
             if (flashMsg) {
                 flashMsg.style.opacity = '0';
@@ -206,22 +231,35 @@ window.setTimeout(function () {
             }
         }, 3000);
 
+        // SweetAlert2 Restore logic
         function confirmRestore() {
             Swal.fire({
                 title: 'Are you sure?',
                 text: "මේකෙන් දැනට තියෙන Data ඔක්කොම මැකිලා, Upload කරන ෆයිල් එකේ Data වැටෙනවා. මේක ආපහු හරවන්න බෑ!",
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#d33', 
-                cancelButtonColor: '#3085d6', 
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
                 confirmButtonText: 'Yes, Restore it!',
                 cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {
-
                     document.getElementById('restoreForm').submit();
                 }
             })
+        }
+
+        // New function to update file name when selected
+        function updateFileName() {
+            const input = document.getElementById('file-upload');
+            const display = document.getElementById('file-name-display');
+            
+            if (input.files && input.files.length > 0) {
+                display.textContent = input.files[0].name;
+                display.classList.add("text-gray-800", "font-bold");
+            } else {
+                display.textContent = "Click to select backup file";
+            }
         }
     </script>
 

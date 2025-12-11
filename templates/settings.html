@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body class="bg-gray-100">
@@ -178,11 +179,11 @@
                         </p>
                         <p class="text-sm text-gray-500 mb-4">Upload a backup file (.db) to restore. <br><b>Warning:</b> This will replace all current data!</p>
                         
-                        <form action="/restore" method="POST" enctype="multipart/form-data" class="flex gap-2 items-center">
+                        <form action="/restore" method="POST" enctype="multipart/form-data" class="flex gap-2 items-center" id="restoreForm">
                             <input type="file" name="backup_file" accept=".db" required 
                                 class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
                             
-                            <button type="submit" onclick="return confirm('⚠️ Are you sure? Current data will be replaced!')" 
+                            <button type="button" onclick="confirmRestore()"
                                 class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded shadow-md transition flex items-center gap-2 whitespace-nowrap">
                                 <i class="fas fa-upload"></i> Restore
                             </button>
@@ -196,6 +197,7 @@
     </div>
 
     <script>
+        // Flash Message Hide Script
         window.setTimeout(function () {
             const flashMsg = document.getElementById('flash-message');
             if (flashMsg) {
@@ -203,8 +205,26 @@
                 setTimeout(() => flashMsg.remove(), 500);
             }
         }, 3000);
+
+        // SweetAlert2 Restore Script (අලුතෙන් දැම්මා)
+        function confirmRestore() {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "මේකෙන් දැනට තියෙන Data ඔක්කොම මැකිලා, Upload කරන ෆයිල් එකේ Data වැටෙනවා. මේක ආපහු හරවන්න බෑ!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33', // රතු පාට
+                cancelButtonColor: '#3085d6', // නිල් පාට
+                confirmButtonText: 'Yes, Restore it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // ඔයා Yes කිව්වොත් විතරක් Form එක Submit වෙනවා
+                    document.getElementById('restoreForm').submit();
+                }
+            })
+        }
     </script>
 
 </body>
-
 </html>

@@ -13,6 +13,7 @@ import random
 from functools import wraps
 import pandas as pd
 from io import BytesIO
+from sqlalchemy import func
 
 app = Flask(__name__)
 
@@ -354,6 +355,14 @@ def reports():
     exp_labels = list(expense_cats.keys())
     exp_values = list(expense_cats.values())
 
+    top_items = db.session.query(
+        BillItem.product_name, 
+        func.sum(BillItem.quantity).label('total_qty')
+    ).group_by(BillItem.product_name).order_by(func.sum(BillItem.quantity).desc()).limit(5).all()
+
+    top_product_names = [item[0] for item in top_items]
+    top_product_values = [item[1] for item in top_items]
+
     return render_template('reports.html', 
                            bills=bills, 
                            total_revenue=total_revenue,
@@ -362,7 +371,9 @@ def reports():
                            chart_labels=json.dumps(chart_labels),
                            chart_values=json.dumps(chart_values),
                            exp_labels=json.dumps(exp_labels),
-                           exp_values=json.dumps(exp_values))
+                           exp_values=json.dumps(exp_values),
+                           top_product_names=json.dumps(top_product_names),
+                           top_product_values=json.dumps(top_product_values))
 
 @app.route('/export-excel')
 @login_required

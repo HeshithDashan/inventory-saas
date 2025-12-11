@@ -197,8 +197,8 @@
     </div>
 
     <script>
-        // Flash Message Hide Script
-        window.setTimeout(function () {
+
+window.setTimeout(function () {
             const flashMsg = document.getElementById('flash-message');
             if (flashMsg) {
                 flashMsg.style.opacity = '0';
@@ -206,20 +206,19 @@
             }
         }, 3000);
 
-        // SweetAlert2 Restore Script (අලුතෙන් දැම්මා)
         function confirmRestore() {
             Swal.fire({
                 title: 'Are you sure?',
                 text: "මේකෙන් දැනට තියෙන Data ඔක්කොම මැකිලා, Upload කරන ෆයිල් එකේ Data වැටෙනවා. මේක ආපහු හරවන්න බෑ!",
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: '#d33', // රතු පාට
-                cancelButtonColor: '#3085d6', // නිල් පාට
+                confirmButtonColor: '#d33', 
+                cancelButtonColor: '#3085d6', 
                 confirmButtonText: 'Yes, Restore it!',
                 cancelButtonText: 'Cancel'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // ඔයා Yes කිව්වොත් විතරක් Form එක Submit වෙනවා
+
                     document.getElementById('restoreForm').submit();
                 }
             })

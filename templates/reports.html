@@ -69,8 +69,8 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            <div class="bg-white p-6 rounded-xl shadow-md">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+            <div class="bg-white p-6 rounded-xl shadow-md lg:col-span-2">
                 <h3 class="text-lg font-bold text-gray-800 mb-4" id="chart-sales-title">Sales Trend (Last 7 Days)</h3>
                 <div class="relative h-64 w-full">
                     <canvas id="salesChart"></canvas>
@@ -81,6 +81,15 @@
                 <div class="relative h-64 w-full flex justify-center">
                     <canvas id="expenseChart"></canvas>
                 </div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-md mb-8">
+            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2" id="chart-top-title">
+                <i class="fas fa-crown text-yellow-500"></i> Top Selling Products
+            </h3>
+            <div class="relative h-64 w-full">
+                <canvas id="topProductsChart"></canvas>
             </div>
         </div>
 
@@ -126,7 +135,9 @@
     <script>
         const salesCtx = document.getElementById('salesChart').getContext('2d');
         const expenseCtx = document.getElementById('expenseChart').getContext('2d');
+        const topProductsCtx = document.getElementById('topProductsChart').getContext('2d');
 
+        // Sales Line Chart
         const salesChart = new Chart(salesCtx, {
             type: 'line',
             data: {
@@ -144,6 +155,7 @@
             options: { responsive: true, maintainAspectRatio: false }
         });
 
+        // Expense Doughnut Chart
         const expLabels = JSON.parse('{{ exp_labels | safe }}');
         const expValues = JSON.parse('{{ exp_values | safe }}');
 
@@ -171,6 +183,34 @@
             container.appendChild(msg);
         }
 
+        // Top Selling Products Chart (Horizontal Bar)
+        const topNames = JSON.parse('{{ top_product_names | safe }}');
+        const topValues = JSON.parse('{{ top_product_values | safe }}');
+
+        const topProductsChart = new Chart(topProductsCtx, {
+            type: 'bar',
+            data: {
+                labels: topNames,
+                datasets: [{
+                    label: 'Quantity Sold',
+                    data: topValues,
+                    backgroundColor: 'rgba(139, 92, 246, 0.7)', // Purple color
+                    borderColor: '#7C3AED',
+                    borderWidth: 1,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                indexAxis: 'y', // Makes it horizontal
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { beginAtZero: true }
+                }
+            }
+        });
+
+        // Language Translation Logic
         const langData = {
             en: {
                 revenue: "Total Revenue",
@@ -178,6 +218,7 @@
                 profit: "Net Profit",
                 salesTitle: "Sales Trend (Last 7 Days)",
                 expTitle: "Expense Distribution",
+                topTitle: "Top Selling Products",
                 history: "Recent Transaction History",
                 langBtn: "සිංහල",
                 exportBtn: "Export to Excel" 
@@ -188,6 +229,7 @@
                 profit: "ශුද්ධ ලාභය",
                 salesTitle: "විකුණුම් ප්‍රවණතාවය (පසුගිය දින 7)",
                 expTitle: "වියදම් බෙදී යාම",
+                topTitle: "වැඩියෙන්ම අලෙවි වූ භාණ්ඩ",
                 history: "මෑත ගනුදෙනු ඉතිහාසය",
                 langBtn: "English",
                 exportBtn: "Excel වෙත ගන්න" 
@@ -205,6 +247,8 @@
             document.getElementById('lbl-profit').innerText = data.profit;
             document.getElementById('chart-sales-title').innerText = data.salesTitle;
             document.getElementById('chart-exp-title').innerText = data.expTitle;
+            // Handle Top Title with Icon
+            document.getElementById('chart-top-title').innerHTML = `<i class="fas fa-crown text-yellow-500 mr-2"></i> ${data.topTitle}`;
             document.getElementById('tbl-history').innerText = data.history;
             document.getElementById('lang-btn').innerText = data.langBtn;
             document.getElementById('btn-export').innerText = data.exportBtn; 

@@ -137,7 +137,6 @@
         const expenseCtx = document.getElementById('expenseChart').getContext('2d');
         const topProductsCtx = document.getElementById('topProductsChart').getContext('2d');
 
-        // Sales Line Chart
         const salesChart = new Chart(salesCtx, {
             type: 'line',
             data: {
@@ -155,7 +154,6 @@
             options: { responsive: true, maintainAspectRatio: false }
         });
 
-        // Expense Doughnut Chart
         const expLabels = JSON.parse('{{ exp_labels | safe }}');
         const expValues = JSON.parse('{{ exp_values | safe }}');
 
@@ -183,7 +181,6 @@
             container.appendChild(msg);
         }
 
-        // Top Selling Products Chart (Horizontal Bar)
         const topNames = JSON.parse('{{ top_product_names | safe }}');
         const topValues = JSON.parse('{{ top_product_values | safe }}');
 
@@ -194,14 +191,14 @@
                 datasets: [{
                     label: 'Quantity Sold',
                     data: topValues,
-                    backgroundColor: 'rgba(139, 92, 246, 0.7)', // Purple color
+                    backgroundColor: 'rgba(139, 92, 246, 0.7)', 
                     borderColor: '#7C3AED',
                     borderWidth: 1,
                     borderRadius: 5
                 }]
             },
             options: {
-                indexAxis: 'y', // Makes it horizontal
+                indexAxis: 'y', 
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
@@ -210,7 +207,6 @@
             }
         });
 
-        // Language Translation Logic
         const langData = {
             en: {
                 revenue: "Total Revenue",
@@ -247,7 +243,6 @@
             document.getElementById('lbl-profit').innerText = data.profit;
             document.getElementById('chart-sales-title').innerText = data.salesTitle;
             document.getElementById('chart-exp-title').innerText = data.expTitle;
-            // Handle Top Title with Icon
             document.getElementById('chart-top-title').innerHTML = `<i class="fas fa-crown text-yellow-500 mr-2"></i> ${data.topTitle}`;
             document.getElementById('tbl-history').innerText = data.history;
             document.getElementById('lang-btn').innerText = data.langBtn;

@@ -238,15 +238,7 @@
             currentLang = currentLang === 'en' ? 'si' : 'en';
             const data = langData[currentLang];
 
-            document.getElementById('lbl-revenue').innerText = data.revenue;
-            document.getElementById('lbl-expenses').innerText = data.expenses;
-            document.getElementById('lbl-profit').innerText = data.profit;
-            document.getElementById('chart-sales-title').innerText = data.salesTitle;
-            document.getElementById('chart-exp-title').innerText = data.expTitle;
-            document.getElementById('chart-top-title').innerHTML = `<i class="fas fa-crown text-yellow-500 mr-2"></i> ${data.topTitle}`;
-            document.getElementById('tbl-history').innerText = data.history;
-            document.getElementById('lang-btn').innerText = data.langBtn;
-            document.getElementById('btn-export').innerText = data.exportBtn; 
+            
 
             if (currentLang === 'si') {
                 document.body.classList.add('sinhala-font');

@@ -518,7 +518,11 @@ def suppliers():
         mobile = request.form.get('mobile')
         company = request.form.get('company')
         
-        
+        new_supplier = Supplier(name=name, mobile=mobile, company=company)
+        db.session.add(new_supplier)
+        db.session.commit()
+        flash('Supplier added successfully!')
+        return redirect(url_for('suppliers'))
         
     suppliers_list = Supplier.query.order_by(Supplier.id.desc()).all()
     return render_template('suppliers.html', suppliers=suppliers_list)

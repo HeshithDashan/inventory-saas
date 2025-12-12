@@ -110,7 +110,12 @@
                     <form method="POST">
                         <input type="hidden" name="action" value="update_store">
 
-                        
+                        <div class="mb-3">
+                            <label class="block text-gray-700 text-xs font-bold mb-1">Shop Name</label>
+                            <input type="text" name="shop_name" value="{{ store.shop_name }}"
+                                class="w-full px-3 py-2 border rounded focus:outline-none focus:ring focus:border-purple-300 font-bold text-sm"
+                                placeholder="Ex: Super Mart">
+                        </div>
 
                         <div class="mb-3">
                             <label class="block text-gray-700 text-xs font-bold mb-1">Address</label>

@@ -21,7 +21,9 @@
 
     <nav class="bg-white shadow-md px-4 py-3 md:px-6 md:py-4 flex flex-col md:flex-row justify-between items-center gap-4 dark:bg-gray-800 dark:border-b dark:border-gray-700">
         <h1 class="text-xl md:text-2xl font-bold text-blue-600 flex items-center gap-2 dark:text-blue-400">
-            <i class="fas fa-cubes"></i> <span id="nav-title">Inventory SaaS 🚀</span>
+            <a href="/" class="flex items-center gap-2">
+                <i class="fas fa-cubes"></i> <span id="nav-title">Inventory SaaS 🚀</span>
+            </a>
         </h1>
 
         <div class="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
@@ -50,7 +52,7 @@
                     <i class="fas fa-cash-register"></i> <span id="btn-pos">POS</span>
                 </a>
                 
-                {% if user.role == 'admin' %}
+                {% if current_user.role == 'admin' %}
                 <a href="/suppliers"
                     class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded text-sm font-bold transition text-center shadow-sm flex items-center gap-1">
                     <i class="fas fa-truck"></i> <span id="btn-suppliers">Suppliers</span>
@@ -63,16 +65,20 @@
                     class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 rounded text-sm font-bold transition text-center shadow-sm flex items-center gap-1">
                     <i class="fas fa-chart-line"></i> <span id="btn-reports">Reports</span>
                 </a>
+                <a href="/users"
+                    class="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-2 rounded text-sm font-bold transition text-center shadow-sm flex items-center gap-1">
+                    <i class="fas fa-users-cog"></i> <span id="btn-users">Users</span>
+                </a>
                 {% endif %}
             </div>
 
             <div class="flex items-center gap-3 justify-between w-full md:w-auto mt-2 md:mt-0">
                 <a href="/settings" class="flex items-center gap-2 group" title="Go to Settings">
-                    <img src="{{ url_for('static', filename='profile_pics/' + user.image_file) }}" alt="Profile" 
+                    <img src="{{ url_for('static', filename='profile_pics/' + current_user.image_file) }}" alt="Profile" 
                          class="h-10 w-10 rounded-full border-2 border-blue-500 object-cover shadow-sm">
                     <div class="flex flex-col">
-                        <span class="text-gray-800 font-bold text-sm dark:text-white">{{ user.username }}</span>
-                        <span class="text-gray-500 text-xs uppercase dark:text-gray-400">{{ user.role }}</span>
+                        <span class="text-gray-800 font-bold text-sm dark:text-white">{{ current_user.username }}</span>
+                        <span class="text-gray-500 text-xs uppercase dark:text-gray-400">{{ current_user.role }}</span>
                     </div>
                 </a>
                 <a href="/logout"
@@ -94,158 +100,162 @@
         {% endif %}
         {% endwith %}
 
-        {% set ns = namespace(low_stock=0, total_value=0) %}
-        {% for product in products %}
-            {% if product.quantity < 5 %}
-                {% set ns.low_stock = ns.low_stock + 1 %}
-            {% endif %}
-            {% set ns.total_value = ns.total_value + (product.price * product.quantity) %}
-        {% endfor %}
+        {% block content %}
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500 flex items-center justify-between dark:bg-gray-800 dark:border-blue-400">
-                <div>
-                    <p class="text-gray-500 text-sm font-bold uppercase tracking-wide dark:text-gray-400" id="lbl-total-items">Total Items</p>
-                    <h3 class="text-3xl font-bold text-gray-800 dark:text-white">{{ products|length }}</h3>
+            {% set ns = namespace(low_stock=0, total_value=0) %}
+            {% for product in products %}
+                {% if product.quantity < 5 %}
+                    {% set ns.low_stock = ns.low_stock + 1 %}
+                {% endif %}
+                {% set ns.total_value = ns.total_value + (product.price * product.quantity) %}
+            {% endfor %}
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-blue-500 flex items-center justify-between dark:bg-gray-800 dark:border-blue-400">
+                    <div>
+                        <p class="text-gray-500 text-sm font-bold uppercase tracking-wide dark:text-gray-400" id="lbl-total-items">Total Items</p>
+                        <h3 class="text-3xl font-bold text-gray-800 dark:text-white">{{ products|length }}</h3>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full text-blue-600 dark:bg-blue-900 dark:text-blue-300">
+                        <i class="fas fa-boxes text-xl"></i>
+                    </div>
                 </div>
-                <div class="bg-blue-100 p-3 rounded-full text-blue-600 dark:bg-blue-900 dark:text-blue-300">
-                    <i class="fas fa-boxes text-xl"></i>
+
+                <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-red-500 flex items-center justify-between dark:bg-gray-800 dark:border-red-400">
+                    <div>
+                        <p class="text-gray-500 text-sm font-bold uppercase tracking-wide dark:text-gray-400" id="lbl-low-stock">Low Stock Alerts</p>
+                        <h3 class="text-3xl font-bold text-red-600 dark:text-red-400">{{ ns.low_stock }}</h3>
+                    </div>
+                    <div class="bg-red-100 p-3 rounded-full text-red-600 dark:bg-red-900 dark:text-red-300">
+                        <i class="fas fa-exclamation-triangle text-xl animate-pulse"></i>
+                    </div>
                 </div>
+
+                {% if current_user.role == 'admin' %}
+                <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500 flex items-center justify-between dark:bg-gray-800 dark:border-green-400">
+                    <div>
+                        <p class="text-gray-500 text-sm font-bold uppercase tracking-wide dark:text-gray-400" id="lbl-total-value">Inventory Value</p>
+                        <h3 class="text-3xl font-bold text-green-600 dark:text-green-400">Rs. {{ "%.2f"|format(ns.total_value) }}</h3>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full text-green-600 dark:bg-green-900 dark:text-green-300">
+                        <i class="fas fa-coins text-xl"></i>
+                    </div>
+                </div>
+                {% endif %}
             </div>
 
-            <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-red-500 flex items-center justify-between dark:bg-gray-800 dark:border-red-400">
-                <div>
-                    <p class="text-gray-500 text-sm font-bold uppercase tracking-wide dark:text-gray-400" id="lbl-low-stock">Low Stock Alerts</p>
-                    <h3 class="text-3xl font-bold text-red-600 dark:text-red-400">{{ ns.low_stock }}</h3>
-                </div>
-                <div class="bg-red-100 p-3 rounded-full text-red-600 dark:bg-red-900 dark:text-red-300">
-                    <i class="fas fa-exclamation-triangle text-xl animate-pulse"></i>
-                </div>
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                <h2 class="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-2 dark:text-white">
+                    <span id="txt-product-list">Product List</span> 📦
+                </h2>
+                <a href="/add-product"
+                    class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-md font-bold transition text-center flex items-center justify-center gap-2 transform hover:scale-105">
+                    <i class="fas fa-plus"></i> <span id="btn-add-product">Add New Product</span>
+                </a>
             </div>
 
-            {% if user.role == 'admin' %}
-            <div class="bg-white rounded-xl shadow-md p-6 border-l-4 border-green-500 flex items-center justify-between dark:bg-gray-800 dark:border-green-400">
-                <div>
-                    <p class="text-gray-500 text-sm font-bold uppercase tracking-wide dark:text-gray-400" id="lbl-total-value">Inventory Value</p>
-                    <h3 class="text-3xl font-bold text-green-600 dark:text-green-400">Rs. {{ "%.2f"|format(ns.total_value) }}</h3>
-                </div>
-                <div class="bg-green-100 p-3 rounded-full text-green-600 dark:bg-green-900 dark:text-green-300">
-                    <i class="fas fa-coins text-xl"></i>
-                </div>
-            </div>
-            {% endif %}
-        </div>
-
-        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-            <h2 class="text-2xl md:text-3xl font-bold text-gray-800 flex items-center gap-2 dark:text-white">
-                <span id="txt-product-list">Product List</span> 📦
-            </h2>
-            <a href="/add-product"
-                class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg shadow-md font-bold transition text-center flex items-center justify-center gap-2 transform hover:scale-105">
-                <i class="fas fa-plus"></i> <span id="btn-add-product">Add New Product</span>
-            </a>
-        </div>
-
-        <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse min-w-[700px]">
-                    <thead>
-                        <tr
-                            class="bg-gray-100 text-gray-700 uppercase text-xs md:text-sm leading-normal border-b border-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600">
-                            <th class="py-3 px-4 md:px-6 font-bold">ID</th>
-                            <th class="py-3 px-4 md:px-6 font-bold" id="th-name">Product Name</th>
-                            <th class="py-3 px-4 md:px-6 font-bold" id="th-cost">Cost (Rs.)</th>
-                            <th class="py-3 px-4 md:px-6 font-bold" id="th-selling">Selling (Rs.)</th>
-                            <th class="py-3 px-4 md:px-6 font-bold" id="th-quantity">Quantity</th>
-                            <th class="py-3 px-4 md:px-6 font-bold text-center" id="th-actions">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="text-gray-600 text-xs md:text-sm font-light dark:text-gray-300">
-                        {% for product in products %}
-                        <tr class="border-b border-gray-200 transition duration-150 dark:border-gray-700 {% if product.quantity < 5 %} bg-red-50 border-l-4 border-red-500 dark:bg-red-900/20 {% else %} hover:bg-gray-50 dark:hover:bg-gray-700 {% endif %}">
-                            <td class="py-3 px-4 md:px-6 font-medium">{{ product.id }}</td>
-                            <td class="py-3 px-4 md:px-6 font-medium text-gray-800 dark:text-white">
-                                {{ product.name }}
-                            </td>
-                            <td class="py-3 px-4 md:px-6 text-gray-500 font-semibold dark:text-gray-400">{{ "%.2f"|format(product.cost_price) }}</td>
-                            <td class="py-3 px-4 md:px-6 text-green-600 font-bold dark:text-green-400">{{ "%.2f"|format(product.price) }}</td>
-                            
-                            <td class="py-3 px-4 md:px-6">
-                                {% if product.quantity == 0 %}
-                                <span class="bg-gray-200 text-gray-800 py-1 px-3 rounded-full text-xs font-bold whitespace-nowrap shadow-sm dark:bg-gray-700 dark:text-gray-300">
-                                    <span class="lbl-outstock">Out of Stock</span>
-                                </span>
-                                {% elif product.quantity < 5 %}
-                                <div class="flex items-center gap-2">
-                                    <span class="text-red-600 font-bold text-lg dark:text-red-400">{{ product.quantity }}</span>
-                                    <span class="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full border border-red-200 font-bold animate-pulse dark:bg-red-900 dark:text-red-200 dark:border-red-800">
-                                        <span class="lbl-lowstock">Low!</span> ⚠️
-                                    </span>
-                                </div>
-                                {% else %}
-                                <span class="bg-green-100 text-green-800 py-1 px-3 rounded-full text-xs font-bold whitespace-nowrap shadow-sm border border-green-200 dark:bg-green-900 dark:text-green-200 dark:border-green-800">
-                                    {{ product.quantity }} <span class="lbl-instock">In Stock</span>
-                                </span>
-                                {% endif %}
-                            </td>
-
-                            <td class="py-3 px-4 md:px-6 text-center flex justify-center gap-3">
-                                <a href="/edit-product/{{ product.id }}"
-                                    class="text-blue-500 hover:text-blue-700 transform hover:scale-125 transition duration-200 dark:text-blue-400 dark:hover:text-blue-300">
-                                    <i class="fas fa-edit text-lg"></i>
-                                </a>
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200 dark:bg-gray-800 dark:border-gray-700">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse min-w-[700px]">
+                        <thead>
+                            <tr
+                                class="bg-gray-100 text-gray-700 uppercase text-xs md:text-sm leading-normal border-b border-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600">
+                                <th class="py-3 px-4 md:px-6 font-bold">ID</th>
+                                <th class="py-3 px-4 md:px-6 font-bold" id="th-name">Product Name</th>
+                                <th class="py-3 px-4 md:px-6 font-bold" id="th-cost">Cost (Rs.)</th>
+                                <th class="py-3 px-4 md:px-6 font-bold" id="th-selling">Selling (Rs.)</th>
+                                <th class="py-3 px-4 md:px-6 font-bold" id="th-quantity">Quantity</th>
+                                <th class="py-3 px-4 md:px-6 font-bold text-center" id="th-actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-gray-600 text-xs md:text-sm font-light dark:text-gray-300">
+                            {% for product in products %}
+                            <tr class="border-b border-gray-200 transition duration-150 dark:border-gray-700 {% if product.quantity < 5 %} bg-red-50 border-l-4 border-red-500 dark:bg-red-900/20 {% else %} hover:bg-gray-50 dark:hover:bg-gray-700 {% endif %}">
+                                <td class="py-3 px-4 md:px-6 font-medium">{{ product.id }}</td>
+                                <td class="py-3 px-4 md:px-6 font-medium text-gray-800 dark:text-white">
+                                    {{ product.name }}
+                                </td>
+                                <td class="py-3 px-4 md:px-6 text-gray-500 font-semibold dark:text-gray-400">{{ "%.2f"|format(product.cost_price) }}</td>
+                                <td class="py-3 px-4 md:px-6 text-green-600 font-bold dark:text-green-400">{{ "%.2f"|format(product.price) }}</td>
                                 
-                                {% if user.role == 'admin' %}
-                                <button onclick="openDeleteModal('{{ product.id }}')"
-                                    class="text-red-500 hover:text-red-700 transform hover:scale-125 transition duration-200 dark:text-red-400 dark:hover:text-red-300">
-                                    <i class="fas fa-trash text-lg"></i>
-                                </button>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                                <td class="py-3 px-4 md:px-6">
+                                    {% if product.quantity == 0 %}
+                                    <span class="bg-gray-200 text-gray-800 py-1 px-3 rounded-full text-xs font-bold whitespace-nowrap shadow-sm dark:bg-gray-700 dark:text-gray-300">
+                                        <span class="lbl-outstock">Out of Stock</span>
+                                    </span>
+                                    {% elif product.quantity < 5 %}
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-red-600 font-bold text-lg dark:text-red-400">{{ product.quantity }}</span>
+                                        <span class="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full border border-red-200 font-bold animate-pulse dark:bg-red-900 dark:text-red-200 dark:border-red-800">
+                                            <span class="lbl-lowstock">Low!</span> ⚠️
+                                        </span>
+                                    </div>
+                                    {% else %}
+                                    <span class="bg-green-100 text-green-800 py-1 px-3 rounded-full text-xs font-bold whitespace-nowrap shadow-sm border border-green-200 dark:bg-green-900 dark:text-green-200 dark:border-green-800">
+                                        {{ product.quantity }} <span class="lbl-instock">In Stock</span>
+                                    </span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="py-3 px-4 md:px-6 text-center flex justify-center gap-3">
+                                    <a href="/edit-product/{{ product.id }}"
+                                        class="text-blue-500 hover:text-blue-700 transform hover:scale-125 transition duration-200 dark:text-blue-400 dark:hover:text-blue-300">
+                                        <i class="fas fa-edit text-lg"></i>
+                                    </a>
+                                    
+                                    {% if current_user.role == 'admin' %}
+                                    <button onclick="openDeleteModal('{{ product.id }}')"
+                                        class="text-red-500 hover:text-red-700 transform hover:scale-125 transition duration-200 dark:text-red-400 dark:hover:text-red-300">
+                                        <i class="fas fa-trash text-lg"></i>
+                                    </button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if not products %}
+                <div class="p-12 text-center text-gray-500 dark:text-gray-400">
+                    <i class="fas fa-box-open text-6xl mb-4 text-gray-300 dark:text-gray-600"></i>
+                    <p class="text-lg" id="txt-no-products">No products found. Add one to get started!</p>
+                </div>
+                {% endif %}
             </div>
 
-            {% if not products %}
-            <div class="p-12 text-center text-gray-500 dark:text-gray-400">
-                <i class="fas fa-box-open text-6xl mb-4 text-gray-300 dark:text-gray-600"></i>
-                <p class="text-lg" id="txt-no-products">No products found. Add one to get started!</p>
+            <div id="deleteModal"
+                class="fixed inset-0 bg-gray-900 bg-opacity-60 overflow-y-auto h-full w-full hidden z-50 flex items-center justify-center backdrop-blur-sm">
+                <div class="relative p-5 border w-96 shadow-2xl rounded-xl bg-white transform transition-all scale-100 dark:bg-gray-800 dark:border-gray-700">
+                    <div class="mt-3 text-center">
+                        <div
+                            class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4 animate-bounce dark:bg-red-900">
+                            <i class="fas fa-exclamation-triangle text-red-600 text-3xl dark:text-red-400"></i>
+                        </div>
+                        <h3 class="text-xl leading-6 font-bold text-gray-900 dark:text-white" id="modal-title">Delete Product?</h3>
+                        <div class="mt-2 px-7 py-3">
+                            <p class="text-gray-500 dark:text-gray-300" id="modal-desc">
+                                Are you sure you want to delete this product? This action cannot be undone.
+                            </p>
+                        </div>
+                        <div class="flex gap-3 justify-center mt-4">
+                            <button onclick="closeDeleteModal()"
+                                class="px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-lg shadow-sm hover:bg-gray-300 focus:outline-none transition w-1/2 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
+                                id="btn-cancel">
+                                Cancel
+                            </button>
+                            <button id="deleteConfirmBtn"
+                                class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-lg shadow-sm hover:bg-red-700 focus:outline-none transition w-1/2"
+                                id="btn-delete">
+                                Yes, Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            {% endif %}
-        </div>
-    </div>
 
-    <div id="deleteModal"
-        class="fixed inset-0 bg-gray-900 bg-opacity-60 overflow-y-auto h-full w-full hidden z-50 flex items-center justify-center backdrop-blur-sm">
-        <div class="relative p-5 border w-96 shadow-2xl rounded-xl bg-white transform transition-all scale-100 dark:bg-gray-800 dark:border-gray-700">
-            <div class="mt-3 text-center">
-                <div
-                    class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-4 animate-bounce dark:bg-red-900">
-                    <i class="fas fa-exclamation-triangle text-red-600 text-3xl dark:text-red-400"></i>
-                </div>
-                <h3 class="text-xl leading-6 font-bold text-gray-900 dark:text-white" id="modal-title">Delete Product?</h3>
-                <div class="mt-2 px-7 py-3">
-                    <p class="text-gray-500 dark:text-gray-300" id="modal-desc">
-                        Are you sure you want to delete this product? This action cannot be undone.
-                    </p>
-                </div>
-                <div class="flex gap-3 justify-center mt-4">
-                    <button onclick="closeDeleteModal()"
-                        class="px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-lg shadow-sm hover:bg-gray-300 focus:outline-none transition w-1/2 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
-                        id="btn-cancel">
-                        Cancel
-                    </button>
-                    <button id="deleteConfirmBtn"
-                        class="px-4 py-2 bg-red-600 text-white text-base font-medium rounded-lg shadow-sm hover:bg-red-700 focus:outline-none transition w-1/2"
-                        id="btn-delete">
-                        Yes, Delete
-                    </button>
-                </div>
-            </div>
+        {% endblock %}
         </div>
-    </div>
 
     <script>
 
@@ -290,6 +300,7 @@
                 reports: "Reports",
                 suppliers: "Suppliers",
                 expenses: "Expenses",
+                users: "Users",
                 logout: "Logout",
                 productList: "Product List",
                 addProduct: "Add New Product",
@@ -318,6 +329,7 @@
                 reports: "වාර්තා",
                 suppliers: "සැපයුම්කරුවන්",
                 expenses: "වියදම්",
+                users: "පරිශීලකයින්",
                 logout: "ඉවත් වන්න",
                 productList: "බඩු ලැයිස්තුව",
                 addProduct: "අලුත් බඩුවක් දමන්න",
@@ -354,6 +366,7 @@
             if(document.getElementById('btn-reports')) document.getElementById('btn-reports').innerText = data.reports;
             if(document.getElementById('btn-suppliers')) document.getElementById('btn-suppliers').innerText = data.suppliers;
             if(document.getElementById('btn-expenses')) document.getElementById('btn-expenses').innerText = data.expenses;
+            if(document.getElementById('btn-users')) document.getElementById('btn-users').innerText = data.users;
             if(document.getElementById('lbl-total-value')) document.getElementById('lbl-total-value').innerText = data.totalValue;
 
             document.getElementById('txt-product-list').innerText = data.productList;

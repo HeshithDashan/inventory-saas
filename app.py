@@ -727,17 +727,13 @@ def admin_reset_password():
         
     return redirect(url_for('manage_users'))
 
-# -------------------------
-# RETURNS & DAMAGES ROUTES
-# -------------------------
 
 @app.route('/returns-damages')
 @login_required
 def returns_damages_page():
-    # බඩු ලිස්ට් එක ගන්නවා (Dropdown එකට)
+
     products = Product.query.all()
     
-    # පරණ Returns සහ Damages ලිස්ට් එක ගන්නවා (අලුත් ඒවා උඩින් පේන්න)
     recent_returns = Return.query.order_by(Return.date.desc()).limit(50).all()
     recent_damages = Damage.query.order_by(Damage.date.desc()).limit(50).all()
     
@@ -753,10 +749,9 @@ def add_return():
 
     product = Product.query.get(product_id)
     if product:
-        # 1. Stock එක වැඩි කරන්න (ආපහු ආපු නිසා)
+
         product.quantity += qty
         
-        # 2. Return එක රෙකෝඩ් කරන්න
         new_return = Return(product_id=product.id, product_name=product.name, quantity=qty, amount_refunded=refund, reason=reason)
         db.session.add(new_return)
         db.session.commit()
@@ -776,13 +771,11 @@ def add_damage():
     product = Product.query.get(product_id)
     if product:
         if product.quantity >= qty:
-            # 1. Stock එක අඩු කරන්න (කැඩුනු/නරක් වුනු නිසා)
+
             product.quantity -= qty
             
-            # 2. පාඩුව ගණනය කරන්න (Cost Price * Qty)
             loss = product.cost_price * qty
 
-            # 3. Damage එක රෙකෝඩ් කරන්න
             new_damage = Damage(product_id=product.id, product_name=product.name, quantity=qty, loss_amount=loss, note=note)
             db.session.add(new_damage)
             db.session.commit()

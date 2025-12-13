@@ -549,19 +549,27 @@ def suppliers():
     suppliers_list = Supplier.query.order_by(Supplier.id.desc()).all()
     
     supplier_data = []
-    current_month_start = datetime.today().replace(day=1, hour=0, minute=0, second=0)
     
     for s in suppliers_list:
         total_all_time = sum(bill.amount for bill in s.bills)
-        total_this_month = sum(bill.amount for bill in s.bills if bill.date >= current_month_start)
         
+        last_bill = SupplierBill.query.filter_by(supplier_id=s.id).order_by(SupplierBill.date.desc()).first()
+        
+        if last_bill:
+            last_date = last_bill.date.strftime('%Y-%m-%d')
+            last_amount = last_bill.amount
+        else:
+            last_date = "No Visits"
+            last_amount = 0
+
         supplier_data.append({
             'id': s.id,
             'name': s.name,
             'mobile': s.mobile,
             'company': s.company,
             'total_all': total_all_time,
-            'total_month': total_this_month
+            'last_date': last_date,
+            'last_amount': last_amount
         })
 
     return render_template('suppliers.html', suppliers=supplier_data)

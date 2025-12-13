@@ -121,7 +121,6 @@ class StoreSettings(db.Model):
     header_text = db.Column(db.String(100), nullable=True)
     footer_text = db.Column(db.String(100), nullable=True)
 
-# ---------------- NEW TABLES ADDED HERE ----------------
 class Return(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
@@ -139,7 +138,6 @@ class Damage(db.Model):
     loss_amount = db.Column(db.Float, nullable=False)
     note = db.Column(db.String(200), nullable=True)
     date = db.Column(db.DateTime, default=datetime.utcnow)
-# -------------------------------------------------------
 
 @app.route('/')
 @login_required

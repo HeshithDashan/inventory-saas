@@ -648,6 +648,67 @@ def delete_expense(id):
     flash('Expense deleted successfully!')
     return redirect(url_for('expenses'))
 
+
+@app.route('/users')
+@login_required
+@admin_required
+def manage_users():
+    users = User.query.all()
+    return render_template('users.html', users=users)
+
+@app.route('/add-user', methods=['POST'])
+@login_required
+@admin_required
+def add_user():
+    username = request.form.get('username')
+    email = request.form.get('email')
+    password = request.form.get('password')
+    role = request.form.get('role')
+
+    user_exists = User.query.filter((User.username == username) | (User.email == email)).first()
+
+    if user_exists:
+        flash('Username or Email already exists!')
+    else:
+        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
+        new_user = User(username=username, email=email, password=hashed_password, role=role)
+        db.session.add(new_user)
+        db.session.commit()
+        flash(f'New {role} added successfully!')
+    
+    return redirect(url_for('manage_users'))
+
+@app.route('/delete-user/<int:id>')
+@login_required
+@admin_required
+def delete_user(id):
+    if id == current_user.id:
+        flash('You cannot delete your own account!')
+    else:
+        user = User.query.get_or_404(id)
+        db.session.delete(user)
+        db.session.commit()
+        flash('User deleted successfully!')
+        
+    return redirect(url_for('manage_users'))
+
+@app.route('/admin-reset-password', methods=['POST'])
+@login_required
+@admin_required
+def admin_reset_password():
+    user_id = request.form.get('user_id')
+    new_password = request.form.get('new_password')
+    
+    user = User.query.get(user_id)
+    if user:
+        user.password = generate_password_hash(new_password, method='pbkdf2:sha256')
+        db.session.commit()
+        flash(f'Password for {user.username} reset successfully!')
+    else:
+        flash('User not found!')
+        
+    return redirect(url_for('manage_users'))
+
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()

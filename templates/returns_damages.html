@@ -1,0 +1,150 @@
+{% extends "dashboard.html" %}
+
+{% block content %}
+<div class="w-full">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-3xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
+            <i class="fas fa-exchange-alt text-indigo-500"></i> Returns & Damages
+        </h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border-l-4 border-green-500">
+            <h3 class="text-lg font-bold text-gray-700 dark:text-white mb-4 flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                    <i class="fas fa-undo"></i>
+                </div>
+                Customer Return
+            </h3>
+            <p class="text-xs text-gray-500 mb-4 dark:text-gray-400">Item comes back to stock (+)</p>
+
+            <form action="{{ url_for('add_return') }}" method="POST" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Product</label>
+                    <select name="product_id" required class="w-full mt-1 p-2 border rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white dark:border-gray-600">
+                        {% for p in products %}
+                        <option value="{{ p.id }}">{{ p.name }} (Current: {{ p.quantity }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Quantity</label>
+                        <input type="number" name="quantity" min="1" required class="w-full mt-1 p-2 border rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white dark:border-gray-600">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Refund Amount (Rs)</label>
+                        <input type="number" step="0.01" name="amount_refunded" required class="w-full mt-1 p-2 border rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white dark:border-gray-600">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Reason</label>
+                    <input type="text" name="reason" placeholder="e.g. Defect, Wrong Item" class="w-full mt-1 p-2 border rounded-lg focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-white dark:border-gray-600">
+                </div>
+                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition shadow-md">
+                    Process Return
+                </button>
+            </form>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border-l-4 border-red-500">
+            <h3 class="text-lg font-bold text-gray-700 dark:text-white mb-4 flex items-center gap-2">
+                <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600">
+                    <i class="fas fa-dumpster-fire"></i>
+                </div>
+                Mark as Damaged
+            </h3>
+            <p class="text-xs text-gray-500 mb-4 dark:text-gray-400">Item removed from stock (-)</p>
+
+            <form action="{{ url_for('add_damage') }}" method="POST" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Product</label>
+                    <select name="product_id" required class="w-full mt-1 p-2 border rounded-lg focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white dark:border-gray-600">
+                        {% for p in products %}
+                        <option value="{{ p.id }}">{{ p.name }} (Current: {{ p.quantity }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Quantity</label>
+                    <input type="number" name="quantity" min="1" required class="w-full mt-1 p-2 border rounded-lg focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white dark:border-gray-600">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Note</label>
+                    <input type="text" name="note" placeholder="e.g. Broken, Expired" class="w-full mt-1 p-2 border rounded-lg focus:ring-2 focus:ring-red-500 dark:bg-gray-700 dark:text-white dark:border-gray-600">
+                </div>
+                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition shadow-md mt-8">
+                    Record Damage
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="bg-gray-50 dark:bg-gray-700 p-3 border-b dark:border-gray-600 font-bold text-gray-700 dark:text-gray-200">
+                Recent Returns
+            </div>
+            <div class="overflow-x-auto max-h-96 overflow-y-auto">
+                <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-600 dark:text-gray-200">
+                        <tr>
+                            <th class="px-4 py-2">Date</th>
+                            <th class="px-4 py-2">Item</th>
+                            <th class="px-4 py-2">Qty</th>
+                            <th class="px-4 py-2">Refund</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in returns %}
+                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50">
+                            <td class="px-4 py-2">{{ r.date.strftime('%Y-%m-%d') }}</td>
+                            <td class="px-4 py-2 font-medium text-gray-900 dark:text-white">
+                                {{ r.product_name }}
+                                <div class="text-xs text-gray-400">{{ r.reason }}</div>
+                            </td>
+                            <td class="px-4 py-2 text-green-600 font-bold">+{{ r.quantity }}</td>
+                            <td class="px-4 py-2">Rs. {{ "%.2f"|format(r.amount_refunded) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700 overflow-hidden">
+            <div class="bg-gray-50 dark:bg-gray-700 p-3 border-b dark:border-gray-600 font-bold text-gray-700 dark:text-gray-200">
+                Recent Damages
+            </div>
+            <div class="overflow-x-auto max-h-96 overflow-y-auto">
+                <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-600 dark:text-gray-200">
+                        <tr>
+                            <th class="px-4 py-2">Date</th>
+                            <th class="px-4 py-2">Item</th>
+                            <th class="px-4 py-2">Qty</th>
+                            <th class="px-4 py-2">Loss</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in damages %}
+                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50">
+                            <td class="px-4 py-2">{{ d.date.strftime('%Y-%m-%d') }}</td>
+                            <td class="px-4 py-2 font-medium text-gray-900 dark:text-white">
+                                {{ d.product_name }}
+                                <div class="text-xs text-gray-400">{{ d.note }}</div>
+                            </td>
+                            <td class="px-4 py-2 text-red-600 font-bold">-{{ d.quantity }}</td>
+                            <td class="px-4 py-2">Rs. {{ "%.2f"|format(d.loss_amount) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

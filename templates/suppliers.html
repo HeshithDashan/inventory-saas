@@ -74,6 +74,13 @@
                             class="flex-1 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 py-2 rounded-lg text-sm font-bold transition flex justify-center items-center gap-2">
                             <i class="fas fa-file-invoice-dollar"></i> Add Bill
                         </button>
+                        
+                        <button onclick="openHistoryModal(this)" 
+                            data-history='{{ supplier.history | tojson }}'
+                            class="bg-gray-100 text-gray-600 hover:bg-gray-200 px-3 py-2 rounded-lg text-sm font-bold transition flex items-center gap-1">
+                            <i class="fas fa-history"></i> History
+                        </button>
+
                         <a href="/delete-supplier/{{ supplier.id }}" onclick="return confirm('Delete this supplier?')" 
                             class="bg-red-50 text-red-500 hover:bg-red-100 px-3 py-2 rounded-lg text-sm transition flex items-center">
                             <i class="fas fa-trash-alt"></i>
@@ -149,6 +156,40 @@
         </div>
     </div>
 
+    <div id="historyModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl h-[500px] flex flex-col">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+                <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-history text-gray-500"></i> Purchase History
+                </h2>
+                <button onclick="closeHistoryModal()" class="text-gray-400 hover:text-red-500 transition">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto flex-1">
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="text-xs font-bold text-gray-500 uppercase border-b border-gray-200">
+                            <th class="pb-2">Date</th>
+                            <th class="pb-2">Note</th>
+                            <th class="pb-2 text-right">Amount (Rs.)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody" class="text-sm text-gray-700">
+                    </tbody>
+                </table>
+                <div id="noHistoryMsg" class="text-center text-gray-400 mt-10 hidden">
+                    <p>No history available.</p>
+                </div>
+            </div>
+            
+            <div class="p-4 bg-gray-50 rounded-b-2xl border-t border-gray-100 text-right">
+                <button onclick="closeHistoryModal()" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-2 px-6 rounded-lg transition">Close</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         function openAddModal() {
             document.getElementById('addModal').classList.remove('hidden');
@@ -170,6 +211,41 @@
         function closeBillModal() {
             document.getElementById('billModal').classList.add('hidden');
             document.getElementById('billModal').classList.remove('flex');
+        }
+
+        // Updated Function to handle JSON data safely
+        function openHistoryModal(btnElement) {
+            const historyData = JSON.parse(btnElement.getAttribute('data-history'));
+            
+            const modal = document.getElementById('historyModal');
+            const tbody = document.getElementById('historyTableBody');
+            const noMsg = document.getElementById('noHistoryMsg');
+            
+            tbody.innerHTML = '';
+            
+            if (historyData.length === 0) {
+                noMsg.classList.remove('hidden');
+            } else {
+                noMsg.classList.add('hidden');
+                historyData.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.className = "border-b border-gray-100 last:border-0";
+                    row.innerHTML = `
+                        <td class="py-3 font-medium">${item.date}</td>
+                        <td class="py-3 text-gray-500">${item.note}</td>
+                        <td class="py-3 text-right font-bold text-gray-800">${item.amount.toFixed(2)}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            }
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeHistoryModal() {
+            document.getElementById('historyModal').classList.add('hidden');
+            document.getElementById('historyModal').classList.remove('flex');
         }
 
         setTimeout(function() {

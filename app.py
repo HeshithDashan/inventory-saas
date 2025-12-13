@@ -615,7 +615,28 @@ def expenses():
         return redirect(url_for('expenses'))
 
     expenses_list = Expense.query.order_by(Expense.date.desc()).all()
-    return render_template('expenses.html', expenses=expenses_list)
+
+    today = datetime.today().date()
+    current_month_start = datetime.today().replace(day=1, hour=0, minute=0, second=0)
+
+    total_expenses_all = sum(exp.amount for exp in expenses_list)
+    total_expenses_month = sum(exp.amount for exp in expenses_list if exp.date >= current_month_start)
+    total_expenses_today = sum(exp.amount for exp in expenses_list if exp.date.date() == today)
+
+    cat_totals = defaultdict(float)
+    for exp in expenses_list:
+        cat_totals[exp.category] += exp.amount
+    
+    chart_labels = list(cat_totals.keys())
+    chart_values = list(cat_totals.values())
+
+    return render_template('expenses.html', 
+                           expenses=expenses_list,
+                           total_all=total_expenses_all,
+                           total_month=total_expenses_month,
+                           total_today=total_expenses_today,
+                           chart_labels=json.dumps(chart_labels),
+                           chart_values=json.dumps(chart_values))
 
 @app.route('/delete-expense/<int:id>')
 @login_required

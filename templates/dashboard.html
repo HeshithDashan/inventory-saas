@@ -21,9 +21,7 @@
 
     <nav class="bg-white shadow-md px-4 py-3 md:px-6 md:py-4 flex flex-col md:flex-row justify-between items-center gap-4 dark:bg-gray-800 dark:border-b dark:border-gray-700">
         <h1 class="text-xl md:text-2xl font-bold text-blue-600 flex items-center gap-2 dark:text-blue-400">
-            <a href="/" class="flex items-center gap-2">
-                <i class="fas fa-cubes"></i> <span id="nav-title">Inventory SaaS 🚀</span>
-            </a>
+            <i class="fas fa-cubes"></i> <span id="nav-title">Inventory SaaS 🚀</span>
         </h1>
 
         <div class="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
@@ -46,7 +44,7 @@
                 සිංහල
             </button>
 
-            <div class="flex gap-2 w-full md:w-auto justify-center">
+            <div class="flex gap-2 w-full md:w-auto justify-center flex-wrap">
                 <a href="/billing"
                     class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded text-sm font-bold transition text-center shadow-sm flex items-center gap-1">
                     <i class="fas fa-cash-register"></i> <span id="btn-pos">POS</span>
@@ -68,6 +66,10 @@
                 <a href="/users"
                     class="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-2 rounded text-sm font-bold transition text-center shadow-sm flex items-center gap-1">
                     <i class="fas fa-users-cog"></i> <span id="btn-users">Users</span>
+                </a>
+                <a href="/returns-damages"
+                    class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded text-sm font-bold transition text-center shadow-sm flex items-center gap-1">
+                    <i class="fas fa-exchange-alt"></i> <span id="btn-returns">Returns</span>
                 </a>
                 {% endif %}
             </div>
@@ -301,6 +303,7 @@
                 suppliers: "Suppliers",
                 expenses: "Expenses",
                 users: "Users",
+                returns: "Returns",
                 logout: "Logout",
                 productList: "Product List",
                 addProduct: "Add New Product",
@@ -330,6 +333,7 @@
                 suppliers: "සැපයුම්කරුවන්",
                 expenses: "වියදම්",
                 users: "පරිශීලකයින්",
+                returns: "ආපසු භාරගැනීම්",
                 logout: "ඉවත් වන්න",
                 productList: "බඩු ලැයිස්තුව",
                 addProduct: "අලුත් බඩුවක් දමන්න",
@@ -367,6 +371,7 @@
             if(document.getElementById('btn-suppliers')) document.getElementById('btn-suppliers').innerText = data.suppliers;
             if(document.getElementById('btn-expenses')) document.getElementById('btn-expenses').innerText = data.expenses;
             if(document.getElementById('btn-users')) document.getElementById('btn-users').innerText = data.users;
+            if(document.getElementById('btn-returns')) document.getElementById('btn-returns').innerText = data.returns;
             if(document.getElementById('lbl-total-value')) document.getElementById('lbl-total-value').innerText = data.totalValue;
 
             document.getElementById('txt-product-list').innerText = data.productList;

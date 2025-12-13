@@ -83,6 +83,14 @@ class Supplier(db.Model):
     mobile = db.Column(db.String(20), nullable=False)
     company = db.Column(db.String(150), nullable=True)
 
+class SupplierBill(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'), nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    date = db.Column(db.DateTime, default=datetime.utcnow)
+    note = db.Column(db.String(200), nullable=True)
+    supplier = db.relationship('Supplier', backref='bills')
+
 class Expense(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     category = db.Column(db.String(100), nullable=False)
@@ -514,18 +522,49 @@ def settings():
 @admin_required
 def suppliers():
     if request.method == 'POST':
-        name = request.form.get('name')
-        mobile = request.form.get('mobile')
-        company = request.form.get('company')
+        action = request.form.get('action')
         
-        new_supplier = Supplier(name=name, mobile=mobile, company=company)
-        db.session.add(new_supplier)
-        db.session.commit()
-        flash('Supplier added successfully!')
-        return redirect(url_for('suppliers'))
+        if action == 'add_supplier':
+            name = request.form.get('name')
+            mobile = request.form.get('mobile')
+            company = request.form.get('company')
+            
+            new_supplier = Supplier(name=name, mobile=mobile, company=company)
+            db.session.add(new_supplier)
+            db.session.commit()
+            flash('Supplier added successfully!')
+            return redirect(url_for('suppliers'))
+            
+        elif action == 'add_bill':
+            supplier_id = request.form.get('supplier_id')
+            amount = request.form.get('amount')
+            note = request.form.get('note')
+            
+            new_bill = SupplierBill(supplier_id=supplier_id, amount=float(amount), note=note)
+            db.session.add(new_bill)
+            db.session.commit()
+            flash('Bill recorded successfully!')
+            return redirect(url_for('suppliers'))
         
     suppliers_list = Supplier.query.order_by(Supplier.id.desc()).all()
-    return render_template('suppliers.html', suppliers=suppliers_list)
+    
+    supplier_data = []
+    current_month_start = datetime.today().replace(day=1, hour=0, minute=0, second=0)
+    
+    for s in suppliers_list:
+        total_all_time = sum(bill.amount for bill in s.bills)
+        total_this_month = sum(bill.amount for bill in s.bills if bill.date >= current_month_start)
+        
+        supplier_data.append({
+            'id': s.id,
+            'name': s.name,
+            'mobile': s.mobile,
+            'company': s.company,
+            'total_all': total_all_time,
+            'total_month': total_this_month
+        })
+
+    return render_template('suppliers.html', suppliers=supplier_data)
 
 @app.route('/delete-supplier/<int:id>')
 @login_required

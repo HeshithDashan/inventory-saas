@@ -562,6 +562,14 @@ def suppliers():
             last_date = "No Visits"
             last_amount = 0
 
+        history_list = []
+        for b in sorted(s.bills, key=lambda x: x.date, reverse=True):
+            history_list.append({
+                'date': b.date.strftime('%Y-%m-%d'),
+                'amount': b.amount,
+                'note': b.note if b.note else '-'
+            })
+
         supplier_data.append({
             'id': s.id,
             'name': s.name,
@@ -569,7 +577,8 @@ def suppliers():
             'company': s.company,
             'total_all': total_all_time,
             'last_date': last_date,
-            'last_amount': last_amount
+            'last_amount': last_amount,
+            'history': history_list
         })
 
     return render_template('suppliers.html', suppliers=supplier_data)

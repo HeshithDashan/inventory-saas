@@ -11,7 +11,8 @@
 
 <body class="bg-gray-50 font-sans">
 
-    <nav class="bg-white shadow-sm border-b border-gray-200 px-6 py-4 flex justify-between items-center sticky top-0 z-50">
+    <nav
+        class="bg-white shadow-sm border-b border-gray-200 px-6 py-4 flex justify-between items-center sticky top-0 z-50">
         <h1 class="text-2xl font-bold text-gray-800 flex items-center gap-3">
             <i class="fas fa-wallet text-pink-500"></i> Manage Expenses
         </h1>
@@ -29,7 +30,8 @@
 
         {% with messages = get_flashed_messages() %}
         {% if messages %}
-        <div id="flash-message" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6 text-sm flex items-center gap-2 shadow-sm">
+        <div id="flash-message"
+            class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6 text-sm flex items-center gap-2 shadow-sm">
             <i class="fas fa-check-circle"></i> {{ messages[0] }}
         </div>
         {% endif %}
@@ -66,9 +68,9 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
+
             <div class="lg:col-span-2 space-y-8">
-                
+
                 <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
                     <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
                         <i class="fas fa-plus-circle text-pink-500"></i> Add New Expense
@@ -76,7 +78,8 @@
                     <form action="/expenses" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="md:col-span-1">
                             <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Category</label>
-                            <select name="category" required class="w-full p-2 border rounded-lg focus:outline-none focus:border-pink-500 bg-gray-50 text-sm">
+                            <select name="category" required
+                                class="w-full p-2 border rounded-lg focus:outline-none focus:border-pink-500 bg-gray-50 text-sm">
                                 <option value="" disabled selected>Select Category</option>
                                 <option value="Food/Tea">Food/Tea</option>
                                 <option value="Transport">Transport</option>
@@ -88,18 +91,22 @@
                         </div>
                         <div class="md:col-span-1">
                             <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Amount (Rs.)</label>
-                            <input type="number" step="0.01" name="amount" required class="w-full p-2 border rounded-lg focus:outline-none focus:border-pink-500 bg-gray-50 text-sm">
+                            <input type="number" step="0.01" name="amount" required
+                                class="w-full p-2 border rounded-lg focus:outline-none focus:border-pink-500 bg-gray-50 text-sm">
                         </div>
                         <div class="md:col-span-1">
                             <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Date</label>
-                            <input type="date" name="date" required class="w-full p-2 border rounded-lg focus:outline-none focus:border-pink-500 bg-gray-50 text-sm">
+                            <input type="date" name="date" required
+                                class="w-full p-2 border rounded-lg focus:outline-none focus:border-pink-500 bg-gray-50 text-sm">
                         </div>
                         <div class="md:col-span-1">
                             <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Description</label>
-                            <input type="text" name="description" placeholder="Optional" class="w-full p-2 border rounded-lg focus:outline-none focus:border-pink-500 bg-gray-50 text-sm">
+                            <input type="text" name="description" placeholder="Optional"
+                                class="w-full p-2 border rounded-lg focus:outline-none focus:border-pink-500 bg-gray-50 text-sm">
                         </div>
                         <div class="md:col-span-2 text-right mt-2">
-                            <button type="submit" class="bg-pink-600 hover:bg-pink-700 text-white px-6 py-2 rounded-lg font-bold text-sm transition shadow-md">
+                            <button type="submit"
+                                class="bg-pink-600 hover:bg-pink-700 text-white px-6 py-2 rounded-lg font-bold text-sm transition shadow-md">
                                 Save Record
                             </button>
                         </div>
@@ -110,7 +117,8 @@
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
-                                <tr class="bg-gray-50 text-gray-500 uppercase text-xs font-bold border-b border-gray-100">
+                                <tr
+                                    class="bg-gray-50 text-gray-500 uppercase text-xs font-bold border-b border-gray-100">
                                     <th class="py-3 px-6">Date</th>
                                     <th class="py-3 px-6">Category</th>
                                     <th class="py-3 px-6">Description</th>
@@ -121,16 +129,21 @@
                             <tbody class="text-gray-700 text-sm">
                                 {% for expense in expenses %}
                                 <tr class="border-b border-gray-50 hover:bg-gray-50 transition">
-                                    <td class="py-3 px-6 font-medium text-gray-500">{{ expense.date.strftime('%Y-%m-%d') }}</td>
+                                    <td class="py-3 px-6 font-medium text-gray-500">{{ expense.date.strftime('%Y-%m-%d')
+                                        }}</td>
                                     <td class="py-3 px-6">
-                                        <span class="bg-gray-100 text-gray-600 py-1 px-2 rounded text-xs font-bold border border-gray-200">
+                                        <span
+                                            class="bg-gray-100 text-gray-600 py-1 px-2 rounded text-xs font-bold border border-gray-200">
                                             {{ expense.category }}
                                         </span>
                                     </td>
                                     <td class="py-3 px-6">{{ expense.description }}</td>
-                                    <td class="py-3 px-6 text-right font-bold text-gray-800">{{ "%.2f"|format(expense.amount) }}</td>
+                                    <td class="py-3 px-6 text-right font-bold text-gray-800">{{
+                                        "%.2f"|format(expense.amount) }}</td>
                                     <td class="py-3 px-6 text-center">
-                                        <a href="/delete-expense/{{ expense.id }}" onclick="return confirm('Are you sure?')" class="text-red-400 hover:text-red-600 transition">
+                                        <a href="/delete-expense/{{ expense.id }}"
+                                            onclick="return confirm('Are you sure?')"
+                                            class="text-red-400 hover:text-red-600 transition">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                     </td>
@@ -165,16 +178,14 @@
     </div>
 
     <script>
-        // Auto hide flash message
+
         setTimeout(function () {
             const flashMsg = document.getElementById('flash-message');
             if (flashMsg) flashMsg.style.display = 'none';
         }, 3000);
-        
-        // Set default date
+
         document.querySelector('input[name="date"]').valueAsDate = new Date();
 
-        // Chart.js Implementation
         const ctx = document.getElementById('expenseChart').getContext('2d');
         const labels = JSON.parse('{{ chart_labels | safe }}');
         const values = JSON.parse('{{ chart_values | safe }}');
@@ -201,11 +212,12 @@
                 }
             });
         } else {
-            // Show empty state if no data
+
             document.getElementById('expenseChart').style.display = 'none';
             const container = document.getElementById('expenseChart').parentNode;
             container.innerHTML = '<p class="text-gray-400 text-sm mt-10">No data for chart</p>';
         }
     </script>
 </body>
+
 </html>

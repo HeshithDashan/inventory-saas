@@ -88,9 +88,9 @@
                         <p class="text-xs text-indigo-600 mb-3" id="selectedProductPrice">Rs. 0.00 | Stock: 0</p>
                         
                         <div class="flex items-center gap-2">
-                            <input type="number" id="manualQty" value="1" min="1" 
+                            <input type="number" id="manualQty" value="1" min="1"
                                 class="w-20 px-3 py-2 border border-indigo-200 rounded-lg text-center font-bold focus:outline-none focus:border-indigo-500">
-                            <button onclick="addProductToCart()" 
+                            <button type="button" onclick="addProductToCart()"
                                 class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg font-bold shadow-md transition transform active:scale-95">
                                 <i class="fas fa-plus mr-2"></i> Add
                             </button>
@@ -159,14 +159,30 @@
 
     </div>
 
+    <script id="products-data" type="application/json">
+        {{ products_json | safe }}
+    </script>
+
     <script>
-        const products = JSON.parse('{{ products_json | safe }}');
+        // Parse the JSON data from the script tag
+        const products = JSON.parse(document.getElementById('products-data').textContent);
         
         let cart = [];
         let selectedProduct = null;
 
         const now = new Date();
         document.getElementById('currentDate').textContent = now.toLocaleDateString('en-GB');
+
+        // --- Helper Function: Reset UI & Focus ---
+        // මේකෙන් තමයි හැම වැඩක් ඉවර වුනාම Barcode එකට cursor එක ගේන්නේ
+        function resetUIState() {
+            selectedProduct = null;
+            document.getElementById('manualAddSection').classList.add('hidden');
+            document.getElementById('searchResults').classList.add('hidden');
+            document.getElementById('productSearch').value = '';
+            document.getElementById('barcodeInput').value = '';
+            document.getElementById('barcodeInput').focus(); // Focus back to scanner
+        }
 
         function filterProducts() {
             const query = document.getElementById('productSearch').value.toLowerCase();
@@ -213,21 +229,28 @@
             document.getElementById('selectedProductName').textContent = p.name;
             document.getElementById('selectedProductPrice').textContent = `Rs. ${p.price} | Stock: ${p.stock}`;
             document.getElementById('manualQty').value = 1;
-            document.getElementById('manualQty').focus();
+            document.getElementById('manualQty').focus(); // Focus on qty input
         }
 
         function addProductToCart() {
-            if (!selectedProduct) return;
-            addToCart(selectedProduct, parseInt(document.getElementById('manualQty').value));
+            if (!selectedProduct) {
+                resetUIState();
+                return;
+            }
             
-            document.getElementById('manualAddSection').classList.add('hidden');
-            selectedProduct = null;
-            document.getElementById('productSearch').focus();
+            const qty = parseInt(document.getElementById('manualQty').value);
+            if(isNaN(qty) || qty <= 0) {
+                Swal.fire({ icon: 'warning', title: 'Invalid Quantity', text: 'Please enter a valid number.' });
+                return;
+            }
+
+            addToCart(selectedProduct, qty);
+            resetUIState(); // Clear manual section and focus barcode
         }
 
         function handleBarcode(event) {
             if (event.key === 'Enter') {
-                const inputVal = document.getElementById('barcodeInput').value.trim();
+                let inputVal = document.getElementById('barcodeInput').value.trim();
                 if (!inputVal) return;
 
                 let code = inputVal;
@@ -236,7 +259,7 @@
                 if (inputVal.includes('*')) {
                     const parts = inputVal.split('*');
                     if (parts.length === 2) {
-                        const qtyPart = parseInt(parts[0]);
+                        const qtyPart = parseInt(parts[0].trim());
                         const codePart = parts[1].trim();
                         
                         if (!isNaN(qtyPart) && qtyPart > 0 && codePart) {
@@ -246,19 +269,34 @@
                     }
                 }
 
+                console.log(`Scanning: Code=${code}, Qty=${quantity}`);
+
                 const product = products.find(p => p.barcode === code);
                 
                 if (product) {
                     addToCart(product, quantity);
+                    
                     const Toast = Swal.mixin({
                         toast: true, position: 'top-end', showConfirmButton: false, timer: 1500,
                         timerProgressBar: true, icon: 'success', title: quantity > 1 ? `${quantity} Items Added` : 'Item Added'
                     });
                     Toast.fire();
+                    
+                    document.getElementById('barcodeInput').value = '';
+                    document.getElementById('barcodeInput').focus();
                 } else {
-                    Swal.fire({ icon: 'error', title: 'Not Found', text: 'Product not found with this barcode.', timer: 1500, showConfirmButton: false });
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Not Found',
+                        text: `Product not found with barcode: ${code}`,
+                        timer: 2000,
+                        showConfirmButton: false,
+                        willClose: () => {
+                             document.getElementById('barcodeInput').value = '';
+                             document.getElementById('barcodeInput').focus();
+                        }
+                    });
                 }
-                document.getElementById('barcodeInput').value = '';
             }
         }
 
@@ -268,14 +306,17 @@
                 return;
             }
 
-            const existingItem = cart.find(item => item.id === product.id);
-            if (existingItem) {
-                if (product.stock < (existingItem.qty + qty)) {
+            const existingItemIndex = cart.findIndex(item => item.id === product.id);
+
+            if (existingItemIndex > -1) {
+                let currentQty = cart[existingItemIndex].qty;
+                if (product.stock < (currentQty + qty)) {
                     Swal.fire({ icon: 'warning', title: 'Limit Reached', text: 'Cannot add more than available stock.' });
                     return;
                 }
-                existingItem.qty += qty;
-                existingItem.total = existingItem.qty * existingItem.price;
+                
+                cart[existingItemIndex].qty += qty;
+                cart[existingItemIndex].total = cart[existingItemIndex].qty * cart[existingItemIndex].price;
             } else {
                 cart.push({
                     id: product.id,
@@ -291,22 +332,29 @@
         function removeFromCart(index) {
             cart.splice(index, 1);
             renderCart();
+            // Important: Return focus to barcode input immediately after delete
+            document.getElementById('barcodeInput').focus();
         }
 
         function renderCart() {
             const container = document.getElementById('cartContainer');
-            const emptyMsg = document.getElementById('emptyCartMsg');
+            
+            // අපි Empty Message එක HTML string එකක් විදියට මෙතනම හදාගමු
+            // මේකෙන් තමයි අර Error එක හැදුවේ
+            const emptyCartHTML = `
+                <div id="emptyCartMsg" class="h-full flex flex-col items-center justify-center text-gray-300">
+                    <i class="fas fa-shopping-basket text-6xl mb-4"></i>
+                    <p class="text-lg font-medium">Cart is empty</p>
+                    <p class="text-sm">Scan barcode or search to add items</p>
+                </div>
+            `;
             
             if (cart.length === 0) {
-                container.innerHTML = '';
-                container.appendChild(emptyMsg);
-                emptyMsg.classList.remove('hidden');
+                container.innerHTML = emptyCartHTML;
                 updateTotals();
                 return;
             }
 
-            emptyMsg.classList.add('hidden');
-            
             let html = '';
             cart.forEach((item, index) => {
                 html += `
@@ -330,6 +378,9 @@
             });
             container.innerHTML = html;
             updateTotals();
+            
+            // Scroll to bottom of cart to show new item
+            container.scrollTop = container.scrollHeight;
         }
 
         function updateTotals() {

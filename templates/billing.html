@@ -225,7 +225,6 @@
             document.getElementById('productSearch').focus();
         }
 
-        // --- UPDATED BARCODE HANDLER WITH MULTIPLIER LOGIC ---
         function handleBarcode(event) {
             if (event.key === 'Enter') {
                 const inputVal = document.getElementById('barcodeInput').value.trim();
@@ -234,7 +233,6 @@
                 let code = inputVal;
                 let quantity = 1;
 
-                // Check for multiplier pattern: e.g., "10*12345"
                 if (inputVal.includes('*')) {
                     const parts = inputVal.split('*');
                     if (parts.length === 2) {
@@ -263,7 +261,6 @@
                 document.getElementById('barcodeInput').value = '';
             }
         }
-        // ---------------------------------------------------
 
         function addToCart(product, qty) {
             if (product.stock < qty) {

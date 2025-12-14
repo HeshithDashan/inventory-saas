@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <title>Receipt #{{ bill.id }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,19 +11,18 @@
     <style>
         body {
             background-color: #f3f4f6;
-            font-family: 'VT323', monospace; /* Thermal Printer Font */
+            font-family: 'VT323', monospace;
         }
 
         .receipt-container {
-            max-width: 80mm; /* Standard Thermal Paper Width */
+            max-width: 80mm;
             margin: 40px auto;
             background: #fff;
             padding: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             position: relative;
         }
 
-        /* කොලේ යට Design එක (zig-zag pattern) */
         .receipt-container::after {
             content: "";
             position: absolute;
@@ -45,29 +45,32 @@
             margin: 10px 0;
         }
 
-        /* PRINT SETTINGS */
         @media print {
             body {
                 background: none;
                 visibility: hidden;
             }
+
             .no-print {
                 display: none !important;
             }
+
             .receipt-container {
                 visibility: visible;
                 position: absolute;
                 left: 0;
                 top: 0;
-                width: 100%; /* Printer එකේ සම්පූර්ණ පළල ගන්නවා */
+                width: 100%;
                 max-width: 100%;
                 margin: 0;
                 padding: 0;
                 box-shadow: none;
             }
+
             .receipt-container::after {
-                display: none; /* Print එකේදි යට design එක ඕන නෑ */
+                display: none;
             }
+
             @page {
                 margin: 0;
                 size: auto;
@@ -75,32 +78,35 @@
         }
     </style>
 </head>
+
 <body>
 
     <div class="max-w-[300px] mx-auto mt-6 mb-4 flex gap-2 no-print">
-        <a href="/billing" class="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 rounded text-center font-sans font-bold shadow transition">
+        <a href="/billing"
+            class="flex-1 bg-gray-600 hover:bg-gray-700 text-white py-2 rounded text-center font-sans font-bold shadow transition">
             <i class="fas fa-arrow-left"></i> Back
         </a>
-        <button onclick="window.print()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded text-center font-sans font-bold shadow transition">
+        <button onclick="window.print()"
+            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded text-center font-sans font-bold shadow transition">
             <i class="fas fa-print"></i> Print
         </button>
     </div>
 
     <div class="receipt-container">
-        
+
         <div class="text-center mb-4">
             <h1 class="text-3xl font-bold uppercase tracking-wider leading-none">{{ store.shop_name }}</h1>
-            
+
             {% if store.address %}
             <p class="text-lg leading-tight mt-1">{{ store.address }}</p>
             {% endif %}
-            
+
             {% if store.phone %}
             <p class="text-lg">Tel: {{ store.phone }}</p>
             {% endif %}
-            
+
             <div class="dashed-line"></div>
-            
+
             {% if store.header_text %}
             <p class="text-xl font-bold uppercase">{{ store.header_text }}</p>
             {% endif %}
@@ -129,7 +135,8 @@
             <tbody>
                 {% for item in bill.items %}
                 <tr>
-                    <td class="leading-none py-1 font-bold">{{ item.product_name if item.product_name else item.name }}</td>
+                    <td class="leading-none py-1 font-bold">{{ item.product_name if item.product_name else item.name }}
+                    </td>
                     <td class="text-center align-top">{{ item.quantity if item.quantity else item.qty }}</td>
                     <td class="text-right align-top">{{ "%.2f"|format(item.price) }}</td>
                     <td class="text-right align-top font-bold">{{ "%.2f"|format(item.total) }}</td>
@@ -150,7 +157,7 @@
         <div class="text-center mt-4">
             <p class="text-xl uppercase font-bold">{{ store.footer_text }}</p>
             <p class="text-sm mt-2 opacity-60 font-sans">Software by Inventory SaaS 🚀</p>
-            
+
             <div class="mt-4 flex justify-center opacity-80">
                 <i class="fas fa-barcode text-6xl"></i>
             </div>
@@ -159,10 +166,8 @@
     </div>
 
     <script>
-        // Page එක Load වුන ගමන් Print Dialog එක ගන්න (POS මැෂින් වලට ලේසියි)
-        // මේක එපා නම් යට පේළිය comment කරන්න
-        // window.onload = function() { setTimeout(function(){ window.print(); }, 500); }
     </script>
 
 </body>
+
 </html>

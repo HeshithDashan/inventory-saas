@@ -56,11 +56,11 @@
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <i class="fas fa-barcode text-gray-400 text-lg"></i>
                         </div>
-                        <input type="text" id="barcodeInput" placeholder="Scan barcode here..." autofocus
+                        <input type="text" id="barcodeInput" placeholder="Scan or type '10*barcode'..." autofocus
                             class="w-full pl-10 pr-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-0 text-gray-800 font-mono font-bold transition-colors"
                             onkeypress="handleBarcode(event)">
                     </div>
-                    <p class="text-[10px] text-gray-400 mt-1 ml-1">Press Enter after scanning</p>
+                    <p class="text-[10px] text-gray-400 mt-1 ml-1">Use 'Qty*' prefix for multiple items (e.g., 10*12345)</p>
                 </div>
 
                 <div class="relative mb-4">
@@ -104,6 +104,7 @@
                 <h3 class="text-sm font-bold text-blue-800 mb-2"><i class="fas fa-info-circle mr-2"></i>Tips</h3>
                 <ul class="text-xs text-blue-600 space-y-1 ml-4 list-disc">
                     <li>Scanner auto-adds 1 item.</li>
+                    <li>Type <b>10*</b> before scanning for quantity.</li>
                     <li>Search allows manual quantity.</li>
                     <li>Check stock warnings in red.</li>
                 </ul>
@@ -224,17 +225,36 @@
             document.getElementById('productSearch').focus();
         }
 
+        // --- UPDATED BARCODE HANDLER WITH MULTIPLIER LOGIC ---
         function handleBarcode(event) {
             if (event.key === 'Enter') {
-                const code = document.getElementById('barcodeInput').value.trim();
-                if (!code) return;
+                const inputVal = document.getElementById('barcodeInput').value.trim();
+                if (!inputVal) return;
+
+                let code = inputVal;
+                let quantity = 1;
+
+                // Check for multiplier pattern: e.g., "10*12345"
+                if (inputVal.includes('*')) {
+                    const parts = inputVal.split('*');
+                    if (parts.length === 2) {
+                        const qtyPart = parseInt(parts[0]);
+                        const codePart = parts[1].trim();
+                        
+                        if (!isNaN(qtyPart) && qtyPart > 0 && codePart) {
+                            quantity = qtyPart;
+                            code = codePart;
+                        }
+                    }
+                }
 
                 const product = products.find(p => p.barcode === code);
+                
                 if (product) {
-                    addToCart(product, 1);
+                    addToCart(product, quantity);
                     const Toast = Swal.mixin({
                         toast: true, position: 'top-end', showConfirmButton: false, timer: 1500,
-                        timerProgressBar: true, icon: 'success', title: 'Item Added'
+                        timerProgressBar: true, icon: 'success', title: quantity > 1 ? `${quantity} Items Added` : 'Item Added'
                     });
                     Toast.fire();
                 } else {
@@ -243,6 +263,7 @@
                 document.getElementById('barcodeInput').value = '';
             }
         }
+        // ---------------------------------------------------
 
         function addToCart(product, qty) {
             if (product.stock < qty) {

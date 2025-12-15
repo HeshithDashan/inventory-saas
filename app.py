@@ -21,7 +21,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///inventory.db'
 app.config['SECRET_KEY'] = 'sago-secret-key-123'
 app.config['UPLOAD_FOLDER'] = 'static/profile_pics'
 
-# Email Config
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
@@ -64,7 +63,6 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-# --- MODELS ---
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -87,7 +85,6 @@ class Supplier(db.Model):
     name = db.Column(db.String(150), nullable=False)
     mobile = db.Column(db.String(20), nullable=False)
     company = db.Column(db.String(150), nullable=True)
-    # Relationships for history
     bills = db.relationship('SupplierBill', backref='supplier', lazy=True)
     payments = db.relationship('SupplierPayment', backref='supplier', lazy=True)
 
@@ -154,12 +151,11 @@ class Damage(db.Model):
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
 
-# --- ROUTES ---
 
 @app.route('/')
 @login_required
 def home():
-    # Low Stock Items
+
     low_stock_products = Product.query.filter(Product.quantity <= 5).all()
     
     search_query = request.args.get('search')
@@ -604,14 +600,12 @@ def suppliers():
         total_paid = sum(pay.amount for pay in s.payments)
         due_amount = total_billed - total_paid
         
-        # Combine history (Bills + Payments)
         history = []
         for b in s.bills:
             history.append({'date': b.date, 'type': 'Bill', 'amount': b.amount, 'note': b.note})
         for p in s.payments:
             history.append({'date': p.date, 'type': 'Payment', 'amount': p.amount, 'note': p.note})
         
-        # Sort history by date (newest first)
         history.sort(key=lambda x: x['date'], reverse=True)
 
         last_entry = history[0] if history else None
@@ -636,7 +630,6 @@ def suppliers():
 @admin_required
 def delete_supplier(id):
     supplier = Supplier.query.get_or_404(id)
-    # Delete related bills and payments
     SupplierBill.query.filter_by(supplier_id=id).delete()
     SupplierPayment.query.filter_by(supplier_id=id).delete()
     db.session.delete(supplier)

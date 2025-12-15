@@ -225,8 +225,8 @@
     </div>
 
     <script>
-
-function openAddModal() {
+        // --- ADD SUPPLIER MODAL ---
+        function openAddModal() {
             document.getElementById('addModal').classList.remove('hidden');
             document.getElementById('addModal').classList.add('flex');
         }
@@ -235,6 +235,7 @@ function openAddModal() {
             document.getElementById('addModal').classList.remove('flex');
         }
 
+        // --- BILL MODAL ---
         function openBillModal(id, name) {
             document.getElementById('billSupplierId').value = id;
             document.getElementById('billSupplierName').innerText = name;
@@ -246,6 +247,7 @@ function openAddModal() {
             document.getElementById('billModal').classList.remove('flex');
         }
 
+        // --- PAYMENT MODAL ---
         function openPaymentModal(id, name) {
             document.getElementById('paymentSupplierId').value = id;
             document.getElementById('paymentSupplierName').innerText = name;

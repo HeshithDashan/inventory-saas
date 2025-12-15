@@ -21,6 +21,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///inventory.db'
 app.config['SECRET_KEY'] = 'sago-secret-key-123'
 app.config['UPLOAD_FOLDER'] = 'static/profile_pics'
 
+# Email Config
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 587
 app.config['MAIL_USE_TLS'] = True
@@ -43,13 +44,15 @@ def load_user(user_id):
 def inject_store_details():
     store = StoreSettings.query.first()
     if not store:
-        store = {
-            'shop_name': 'My Shop',
-            'address': '',
-            'phone': '',
-            'header_text': 'Welcome',
-            'footer_text': 'Thank You'
-        }
+        store = StoreSettings(
+            shop_name='My Shop',
+            address='',
+            phone='',
+            header_text='Welcome',
+            footer_text='Thank You'
+        )
+        db.session.add(store)
+        db.session.commit()
     return dict(store=store)
 
 def admin_required(f):
@@ -60,6 +63,8 @@ def admin_required(f):
             return redirect(url_for('home'))
         return f(*args, **kwargs)
     return decorated_function
+
+# --- MODELS ---
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -82,6 +87,9 @@ class Supplier(db.Model):
     name = db.Column(db.String(150), nullable=False)
     mobile = db.Column(db.String(20), nullable=False)
     company = db.Column(db.String(150), nullable=True)
+    # Relationships for history
+    bills = db.relationship('SupplierBill', backref='supplier', lazy=True)
+    payments = db.relationship('SupplierPayment', backref='supplier', lazy=True)
 
 class SupplierBill(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -89,7 +97,13 @@ class SupplierBill(db.Model):
     amount = db.Column(db.Float, nullable=False)
     date = db.Column(db.DateTime, default=datetime.utcnow)
     note = db.Column(db.String(200), nullable=True)
-    supplier = db.relationship('Supplier', backref='bills')
+
+class SupplierPayment(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    supplier_id = db.Column(db.Integer, db.ForeignKey('supplier.id'), nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    date = db.Column(db.DateTime, default=datetime.utcnow)
+    note = db.Column(db.String(200), nullable=True)
 
 class Expense(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -139,9 +153,15 @@ class Damage(db.Model):
     note = db.Column(db.String(200), nullable=True)
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
+
+# --- ROUTES ---
+
 @app.route('/')
 @login_required
 def home():
+    # Low Stock Items
+    low_stock_products = Product.query.filter(Product.quantity <= 5).all()
+    
     search_query = request.args.get('search')
     if search_query:
         products = Product.query.filter(
@@ -150,7 +170,8 @@ def home():
         ).all()
     else:
         products = Product.query.order_by(Product.id.desc()).all()
-    return render_template('dashboard.html', user=current_user, products=products)
+        
+    return render_template('dashboard.html', user=current_user, products=products, low_stock_products=low_stock_products)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -551,7 +572,6 @@ def suppliers():
             db.session.add(new_supplier)
             db.session.commit()
             flash('Supplier added successfully!')
-            return redirect(url_for('suppliers'))
             
         elif action == 'add_bill':
             supplier_id = request.form.get('supplier_id')
@@ -561,42 +581,52 @@ def suppliers():
             new_bill = SupplierBill(supplier_id=supplier_id, amount=float(amount), note=note)
             db.session.add(new_bill)
             db.session.commit()
-            flash('Bill recorded successfully!')
-            return redirect(url_for('suppliers'))
-        
+            flash('Bill recorded (Added to Debt)!')
+
+        elif action == 'add_payment':
+            supplier_id = request.form.get('supplier_id')
+            amount = request.form.get('amount')
+            note = request.form.get('note')
+            
+            new_payment = SupplierPayment(supplier_id=supplier_id, amount=float(amount), note=note)
+            db.session.add(new_payment)
+            db.session.commit()
+            flash('Payment recorded (Deducted from Debt)!')
+            
+        return redirect(url_for('suppliers'))
+    
     suppliers_list = Supplier.query.order_by(Supplier.id.desc()).all()
     
     supplier_data = []
     
     for s in suppliers_list:
-        total_all_time = sum(bill.amount for bill in s.bills)
+        total_billed = sum(bill.amount for bill in s.bills)
+        total_paid = sum(pay.amount for pay in s.payments)
+        due_amount = total_billed - total_paid
         
-        last_bill = SupplierBill.query.filter_by(supplier_id=s.id).order_by(SupplierBill.date.desc()).first()
+        # Combine history (Bills + Payments)
+        history = []
+        for b in s.bills:
+            history.append({'date': b.date, 'type': 'Bill', 'amount': b.amount, 'note': b.note})
+        for p in s.payments:
+            history.append({'date': p.date, 'type': 'Payment', 'amount': p.amount, 'note': p.note})
         
-        if last_bill:
-            last_date = last_bill.date.strftime('%Y-%m-%d')
-            last_amount = last_bill.amount
-        else:
-            last_date = "No Visits"
-            last_amount = 0
+        # Sort history by date (newest first)
+        history.sort(key=lambda x: x['date'], reverse=True)
 
-        history_list = []
-        for b in sorted(s.bills, key=lambda x: x.date, reverse=True):
-            history_list.append({
-                'date': b.date.strftime('%Y-%m-%d'),
-                'amount': b.amount,
-                'note': b.note if b.note else '-'
-            })
+        last_entry = history[0] if history else None
+        last_date = last_entry['date'].strftime('%Y-%m-%d') if last_entry else "No Activity"
 
         supplier_data.append({
             'id': s.id,
             'name': s.name,
             'mobile': s.mobile,
             'company': s.company,
-            'total_all': total_all_time,
+            'total_billed': total_billed,
+            'total_paid': total_paid,
+            'due_amount': due_amount,
             'last_date': last_date,
-            'last_amount': last_amount,
-            'history': history_list
+            'history': history
         })
 
     return render_template('suppliers.html', suppliers=supplier_data)
@@ -606,9 +636,12 @@ def suppliers():
 @admin_required
 def delete_supplier(id):
     supplier = Supplier.query.get_or_404(id)
+    # Delete related bills and payments
+    SupplierBill.query.filter_by(supplier_id=id).delete()
+    SupplierPayment.query.filter_by(supplier_id=id).delete()
     db.session.delete(supplier)
     db.session.commit()
-    flash('Supplier deleted successfully!')
+    flash('Supplier and all history deleted successfully!')
     return redirect(url_for('suppliers'))
 
 @app.route('/expenses', methods=['GET', 'POST'])

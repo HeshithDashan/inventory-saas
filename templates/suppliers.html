@@ -225,8 +225,8 @@
     </div>
 
     <script>
-        // --- ADD SUPPLIER MODAL ---
-        function openAddModal() {
+
+function openAddModal() {
             document.getElementById('addModal').classList.remove('hidden');
             document.getElementById('addModal').classList.add('flex');
         }
@@ -235,7 +235,6 @@
             document.getElementById('addModal').classList.remove('flex');
         }
 
-        // --- BILL MODAL ---
         function openBillModal(id, name) {
             document.getElementById('billSupplierId').value = id;
             document.getElementById('billSupplierName').innerText = name;
@@ -247,7 +246,6 @@
             document.getElementById('billModal').classList.remove('flex');
         }
 
-        // --- PAYMENT MODAL ---
         function openPaymentModal(id, name) {
             document.getElementById('paymentSupplierId').value = id;
             document.getElementById('paymentSupplierName').innerText = name;
@@ -259,7 +257,6 @@
             document.getElementById('paymentModal').classList.remove('flex');
         }
 
-        // --- HISTORY MODAL ---
         function openHistoryModal(btnElement) {
             const historyData = JSON.parse(btnElement.getAttribute('data-history'));
             const modal = document.getElementById('historyModal');
@@ -273,14 +270,12 @@
             } else {
                 noMsg.classList.add('hidden');
                 historyData.forEach(item => {
-                    // Date formatting
+
                     const dateObj = new Date(item.date);
                     const dateStr = dateObj.toLocaleDateString();
 
-                    // Check Type (Bill or Payment)
                     const isBill = item.type === 'Bill';
                     
-                    // Styles based on type
                     const amountClass = isBill ? 'text-blue-600' : 'text-green-600';
                     const sign = isBill ? '+' : '-';
                     const badge = isBill 

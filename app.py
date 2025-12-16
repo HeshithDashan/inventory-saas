@@ -599,14 +599,12 @@ def suppliers():
         total_paid = sum(pay.amount for pay in s.payments)
         due_amount = total_billed - total_paid
         
-        # Combine history (Bills + Payments)
         history = []
         for b in s.bills:
             history.append({'date': b.date, 'type': 'Bill', 'amount': b.amount, 'note': b.note})
         for p in s.payments:
             history.append({'date': p.date, 'type': 'Payment', 'amount': p.amount, 'note': p.note})
         
-        # Sort history by date (newest first)
         history.sort(key=lambda x: x['date'], reverse=True)
 
         last_entry = history[0] if history else None
@@ -814,7 +812,6 @@ def add_damage():
     
     return redirect(url_for('returns_damages_page'))
 
-# --- BARCODE GENERATOR ROUTE ---
 @app.route('/barcode-labels')
 @login_required
 def barcode_labels():

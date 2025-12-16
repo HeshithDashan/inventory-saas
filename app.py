@@ -155,7 +155,6 @@ class Damage(db.Model):
 @app.route('/')
 @login_required
 def home():
-
     low_stock_products = Product.query.filter(Product.quantity <= 5).all()
     
     search_query = request.args.get('search')
@@ -600,12 +599,14 @@ def suppliers():
         total_paid = sum(pay.amount for pay in s.payments)
         due_amount = total_billed - total_paid
         
+        # Combine history (Bills + Payments)
         history = []
         for b in s.bills:
             history.append({'date': b.date, 'type': 'Bill', 'amount': b.amount, 'note': b.note})
         for p in s.payments:
             history.append({'date': p.date, 'type': 'Payment', 'amount': p.amount, 'note': p.note})
         
+        # Sort history by date (newest first)
         history.sort(key=lambda x: x['date'], reverse=True)
 
         last_entry = history[0] if history else None
@@ -812,6 +813,13 @@ def add_damage():
         flash('Product not found!')
     
     return redirect(url_for('returns_damages_page'))
+
+# --- BARCODE GENERATOR ROUTE ---
+@app.route('/barcode-labels')
+@login_required
+def barcode_labels():
+    products = Product.query.order_by(Product.name).all()
+    return render_template('barcode_labels.html', products=products)
 
 if __name__ == '__main__':
     with app.app_context():

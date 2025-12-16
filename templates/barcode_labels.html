@@ -1,0 +1,142 @@
+{% extends "index.html" %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+
+<div class="container mx-auto px-4 py-8">
+    
+    <div class="flex justify-between items-center mb-8 no-print">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-3">
+                <i class="fas fa-barcode text-indigo-500"></i> Barcode Generator
+            </h1>
+            <p class="text-gray-500">Generate and print barcode labels for your products</p>
+        </div>
+        <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg shadow-lg flex items-center gap-2">
+            <i class="fas fa-print"></i> Print Labels
+        </button>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-md p-6 mb-8 border border-gray-200 no-print">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+            
+            <div class="col-span-1">
+                <label class="block text-sm font-bold text-gray-700 mb-2">Select Product</label>
+                <select id="productSelect" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" onchange="updatePreview()">
+                    <option value="" disabled selected>Choose a product...</option>
+                    {% for p in products %}
+                        <option value="{{ p.barcode if p.barcode else p.id }}" data-name="{{ p.name }}" data-price="{{ p.price }}">
+                            {{ p.name }} (Rs. {{ p.price }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Number of Labels</label>
+                <input type="number" id="labelQty" value="10" min="1" max="100" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+            </div>
+
+            <div>
+                <button onclick="generateLabels()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg transition shadow">
+                    Generate Preview
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-gray-100 p-8 overflow-auto flex justify-center print-area">
+        <div id="labelSheet" class="bg-white shadow-2xl p-4 grid grid-cols-4 gap-4 content-start" 
+             style="width: 210mm; min-height: 297mm; box-sizing: border-box;">
+            
+            <div class="col-span-4 text-center text-gray-400 py-20">
+                Select a product and click Generate
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<style>
+    /* Printing Styles */
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        .print-area, .print-area * {
+            visibility: visible;
+        }
+        .print-area {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            background: white;
+        }
+        .no-print {
+            display: none !important;
+        }
+        #labelSheet {
+            box-shadow: none;
+            width: 100%;
+        }
+    }
+
+    /* Single Label Style */
+    .label-card {
+        border: 1px dashed #ddd;
+        padding: 5px;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 120px; /* Adjust height for sticker size */
+    }
+</style>
+
+<script>
+    function generateLabels() {
+        const select = document.getElementById('productSelect');
+        const qty = document.getElementById('labelQty').value;
+        const sheet = document.getElementById('labelSheet');
+
+        if (select.selectedIndex === 0) {
+            Swal.fire('Please select a product first!');
+            return;
+        }
+
+        const barcodeValue = select.value;
+        const option = select.options[select.selectedIndex];
+        const name = option.getAttribute('data-name');
+        const price = parseFloat(option.getAttribute('data-price')).toFixed(2);
+
+        // Clear previous labels
+        sheet.innerHTML = '';
+
+        for (let i = 0; i < qty; i++) {
+            const div = document.createElement('div');
+            div.className = 'label-card';
+            div.innerHTML = `
+                <p class="text-[10px] font-bold truncate w-full mb-1">${name}</p>
+                <svg class="barcode-${i}" style="width: 100%; height: 40px;"></svg>
+                <p class="text-sm font-bold mt-1">Rs. ${price}</p>
+            `;
+            sheet.appendChild(div);
+
+            // Generate Barcode inside the SVG
+            JsBarcode(`.barcode-${i}`, barcodeValue, {
+                format: "CODE128",
+                width: 1.5,
+                height: 40,
+                displayValue: true,
+                fontSize: 10,
+                margin: 0
+            });
+        }
+    }
+</script>
+{% endblock %}

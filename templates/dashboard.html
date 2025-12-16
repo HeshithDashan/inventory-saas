@@ -71,6 +71,10 @@
                     class="bg-gray-600 hover:bg-gray-700 text-white px-3 py-2 rounded text-sm font-bold transition text-center shadow-sm flex items-center gap-1">
                     <i class="fas fa-exchange-alt"></i> <span id="btn-returns">Returns</span>
                 </a>
+                <a href="/barcode-labels"
+                    class="bg-teal-500 hover:bg-teal-600 text-white px-3 py-2 rounded text-sm font-bold transition text-center shadow-sm flex items-center gap-1">
+                    <i class="fas fa-barcode"></i> <span id="btn-barcodes">Barcodes</span>
+                </a>
                 {% endif %}
             </div>
 
@@ -304,6 +308,7 @@
                 expenses: "Expenses",
                 users: "Users",
                 returns: "Returns",
+                barcodes: "Barcodes", // Added
                 logout: "Logout",
                 productList: "Product List",
                 addProduct: "Add New Product",
@@ -334,6 +339,7 @@
                 expenses: "වියදම්",
                 users: "පරිශීලකයින්",
                 returns: "ආපසු භාරගැනීම්",
+                barcodes: "බාර්කෝඩ්", // Added
                 logout: "ඉවත් වන්න",
                 productList: "බඩු ලැයිස්තුව",
                 addProduct: "අලුත් බඩුවක් දමන්න",
@@ -372,6 +378,7 @@
             if(document.getElementById('btn-expenses')) document.getElementById('btn-expenses').innerText = data.expenses;
             if(document.getElementById('btn-users')) document.getElementById('btn-users').innerText = data.users;
             if(document.getElementById('btn-returns')) document.getElementById('btn-returns').innerText = data.returns;
+            if(document.getElementById('btn-barcodes')) document.getElementById('btn-barcodes').innerText = data.barcodes; // Added
             if(document.getElementById('lbl-total-value')) document.getElementById('lbl-total-value').innerText = data.totalValue;
 
             document.getElementById('txt-product-list').innerText = data.productList;

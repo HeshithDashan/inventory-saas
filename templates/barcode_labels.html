@@ -1,142 +1,239 @@
-{% extends "index.html" %}
+<!DOCTYPE html>
+<html lang="en">
 
-{% block content %}
-<script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+<head>
+    <title>Barcode Generator - SaaS Inventory</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Sinhala:wght@400;700&display=swap');
+        .sinhala-font { font-family: 'Noto Sans Sinhala', sans-serif; }
+        
+        /* Printing Styles */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .print-area, .print-area * {
+                visibility: visible;
+            }
+            .print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                padding: 0;
+                background: white;
+            }
+            .no-print {
+                display: none !important;
+            }
+            #labelSheet {
+                box-shadow: none;
+                width: 100%;
+            }
+        }
 
-<div class="container mx-auto px-4 py-8">
+        /* Single Label Style */
+        .label-card {
+            border: 1px dashed #ddd;
+            padding: 5px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 120px;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+</head>
+
+<body class="bg-gray-50 transition-colors duration-300 dark:bg-gray-900">
+
+    <nav class="bg-white shadow-md px-4 py-3 md:px-6 md:py-4 flex flex-col md:flex-row justify-between items-center gap-4 dark:bg-gray-800 dark:border-b dark:border-gray-700 no-print">
+        <h1 class="text-xl md:text-2xl font-bold text-blue-600 flex items-center gap-2 dark:text-blue-400">
+            <i class="fas fa-cubes"></i> <span id="nav-title">Inventory SaaS 🚀</span>
+        </h1>
+
+        <div class="flex flex-col md:flex-row items-center gap-3 w-full md:w-auto">
+            
+            <a href="/" class="text-gray-500 hover:text-blue-600 font-bold transition flex items-center gap-1 dark:text-gray-300 dark:hover:text-blue-400">
+                <i class="fas fa-arrow-left"></i> Dashboard
+            </a>
+
+            <button id="theme-toggle" class="p-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-yellow-300 dark:hover:bg-gray-600 transition">
+                <i class="fas fa-moon" id="theme-icon"></i>
+            </button>
+
+            <div class="flex gap-2 w-full md:w-auto justify-center flex-wrap">
+                <a href="/billing" class="bg-green-500 hover:bg-green-600 text-white px-3 py-2 rounded text-sm font-bold transition text-center shadow-sm flex items-center gap-1">
+                    <i class="fas fa-cash-register"></i> POS
+                </a>
+                
+                {% if current_user.role == 'admin' %}
+                <a href="/suppliers" class="bg-orange-500 hover:bg-orange-600 text-white px-3 py-2 rounded text-sm font-bold transition text-center shadow-sm flex items-center gap-1">
+                    <i class="fas fa-truck"></i> Suppliers
+                </a>
+                <a href="/expenses" class="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded text-sm font-bold transition text-center shadow-sm flex items-center gap-1">
+                    <i class="fas fa-file-invoice-dollar"></i> Expenses
+                </a>
+                <a href="/reports" class="bg-purple-500 hover:bg-purple-600 text-white px-3 py-2 rounded text-sm font-bold transition text-center shadow-sm flex items-center gap-1">
+                    <i class="fas fa-chart-line"></i> Reports
+                </a>
+                {% endif %}
+            </div>
+
+            <div class="flex items-center gap-3 justify-between w-full md:w-auto mt-2 md:mt-0">
+                <div class="flex items-center gap-2 group">
+                    <img src="{{ url_for('static', filename='profile_pics/' + current_user.image_file) }}" alt="Profile" 
+                         class="h-10 w-10 rounded-full border-2 border-blue-500 object-cover shadow-sm">
+                    <div class="flex flex-col">
+                        <span class="text-gray-800 font-bold text-sm dark:text-white">{{ current_user.username }}</span>
+                        <span class="text-gray-500 text-xs uppercase dark:text-gray-400">{{ current_user.role }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8">
+        
+        <div class="flex justify-between items-center mb-8 no-print">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-3 dark:text-white">
+                    <i class="fas fa-barcode text-teal-500"></i> Barcode Generator
+                </h1>
+                <p class="text-gray-500 dark:text-gray-400">Generate and print barcode labels for your products</p>
+            </div>
+            <button onclick="window.print()" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-6 rounded-lg shadow-lg flex items-center gap-2 transition transform hover:scale-105">
+                <i class="fas fa-print"></i> Print Labels
+            </button>
+        </div>
     
-    <div class="flex justify-between items-center mb-8 no-print">
-        <div>
-            <h1 class="text-3xl font-bold text-gray-800 flex items-center gap-3">
-                <i class="fas fa-barcode text-indigo-500"></i> Barcode Generator
-            </h1>
-            <p class="text-gray-500">Generate and print barcode labels for your products</p>
-        </div>
-        <button onclick="window.print()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-6 rounded-lg shadow-lg flex items-center gap-2">
-            <i class="fas fa-print"></i> Print Labels
-        </button>
-    </div>
-
-    <div class="bg-white rounded-xl shadow-md p-6 mb-8 border border-gray-200 no-print">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
-            
-            <div class="col-span-1">
-                <label class="block text-sm font-bold text-gray-700 mb-2">Select Product</label>
-                <select id="productSelect" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none" onchange="updatePreview()">
-                    <option value="" disabled selected>Choose a product...</option>
-                    {% for p in products %}
-                        <option value="{{ p.barcode if p.barcode else p.id }}" data-name="{{ p.name }}" data-price="{{ p.price }}">
-                            {{ p.name }} (Rs. {{ p.price }})
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-sm font-bold text-gray-700 mb-2">Number of Labels</label>
-                <input type="number" id="labelQty" value="10" min="1" max="100" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
-            </div>
-
-            <div>
-                <button onclick="generateLabels()" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 rounded-lg transition shadow">
-                    Generate Preview
-                </button>
+        <div class="bg-white rounded-xl shadow-md p-6 mb-8 border border-gray-200 no-print dark:bg-gray-800 dark:border-gray-700">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                
+                <div class="col-span-1">
+                    <label class="block text-sm font-bold text-gray-700 mb-2 dark:text-gray-300">Select Product</label>
+                    <select id="productSelect" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-teal-500 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <option value="" disabled selected>Choose a product...</option>
+                        {% for p in products %}
+                            <option value="{{ p.barcode if p.barcode else p.id }}" data-name="{{ p.name }}" data-price="{{ p.price }}">
+                                {{ p.name }} (Rs. {{ p.price }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+    
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-2 dark:text-gray-300">Number of Labels</label>
+                    <input type="number" id="labelQty" value="10" min="1" max="100" class="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-teal-500 outline-none dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                </div>
+    
+                <div>
+                    <button onclick="generateLabels()" class="w-full bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 rounded-lg transition shadow">
+                        Generate Preview
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
-
-    <div class="bg-gray-100 p-8 overflow-auto flex justify-center print-area">
-        <div id="labelSheet" class="bg-white shadow-2xl p-4 grid grid-cols-4 gap-4 content-start" 
-             style="width: 210mm; min-height: 297mm; box-sizing: border-box;">
-            
-            <div class="col-span-4 text-center text-gray-400 py-20">
-                Select a product and click Generate
+    
+        <div class="bg-gray-100 p-8 overflow-auto flex justify-center print-area dark:bg-gray-900">
+            <div id="labelSheet" class="bg-white shadow-2xl p-4 grid grid-cols-4 gap-4 content-start" 
+                 style="width: 210mm; min-height: 297mm; box-sizing: border-box;">
+                
+                <div class="col-span-4 text-center text-gray-400 py-20">
+                    <i class="fas fa-arrow-up mb-2 text-2xl"></i><br>
+                    Select a product and click Generate
+                </div>
+    
             </div>
-
         </div>
+    
     </div>
 
-</div>
+    <script>
+        // --- Theme Toggle Script ---
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
 
-<style>
-    /* Printing Styles */
-    @media print {
-        body * {
-            visibility: hidden;
-        }
-        .print-area, .print-area * {
-            visibility: visible;
-        }
-        .print-area {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            margin: 0;
-            padding: 0;
-            background: white;
-        }
-        .no-print {
-            display: none !important;
-        }
-        #labelSheet {
-            box-shadow: none;
-            width: 100%;
-        }
-    }
-
-    /* Single Label Style */
-    .label-card {
-        border: 1px dashed #ddd;
-        padding: 5px;
-        text-align: center;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 120px; /* Adjust height for sticker size */
-    }
-</style>
-
-<script>
-    function generateLabels() {
-        const select = document.getElementById('productSelect');
-        const qty = document.getElementById('labelQty').value;
-        const sheet = document.getElementById('labelSheet');
-
-        if (select.selectedIndex === 0) {
-            Swal.fire('Please select a product first!');
-            return;
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            themeIcon.classList.remove('fa-moon');
+            themeIcon.classList.add('fa-sun');
+        } else {
+            document.documentElement.classList.remove('dark');
         }
 
-        const barcodeValue = select.value;
-        const option = select.options[select.selectedIndex];
-        const name = option.getAttribute('data-name');
-        const price = parseFloat(option.getAttribute('data-price')).toFixed(2);
+        themeToggleBtn.addEventListener('click', function() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('color-theme', 'light');
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('color-theme', 'dark');
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+            }
+        });
 
-        // Clear previous labels
-        sheet.innerHTML = '';
+        // --- Barcode Generator Script ---
+        function generateLabels() {
+            const select = document.getElementById('productSelect');
+            const qty = document.getElementById('labelQty').value;
+            const sheet = document.getElementById('labelSheet');
 
-        for (let i = 0; i < qty; i++) {
-            const div = document.createElement('div');
-            div.className = 'label-card';
-            div.innerHTML = `
-                <p class="text-[10px] font-bold truncate w-full mb-1">${name}</p>
-                <svg class="barcode-${i}" style="width: 100%; height: 40px;"></svg>
-                <p class="text-sm font-bold mt-1">Rs. ${price}</p>
-            `;
-            sheet.appendChild(div);
+            if (select.selectedIndex === 0) {
+                Swal.fire('Please select a product first!');
+                return;
+            }
 
-            // Generate Barcode inside the SVG
-            JsBarcode(`.barcode-${i}`, barcodeValue, {
-                format: "CODE128",
-                width: 1.5,
-                height: 40,
-                displayValue: true,
-                fontSize: 10,
-                margin: 0
-            });
+            const barcodeValue = select.value;
+            const option = select.options[select.selectedIndex];
+            const name = option.getAttribute('data-name');
+            const price = parseFloat(option.getAttribute('data-price')).toFixed(2);
+
+            // Clear previous labels
+            sheet.innerHTML = '';
+
+            for (let i = 0; i < qty; i++) {
+                const div = document.createElement('div');
+                div.className = 'label-card';
+                // Inline styles to ensure printing works perfectly
+                div.innerHTML = `
+                    <p style="font-size: 10px; font-weight: bold; overflow: hidden; white-space: nowrap; width: 100%; margin-bottom: 2px;">${name}</p>
+                    <svg class="barcode-${i}" style="width: 100%; height: 40px;"></svg>
+                    <p style="font-size: 14px; font-weight: bold; margin-top: 2px;">Rs. ${price}</p>
+                `;
+                sheet.appendChild(div);
+
+                // Generate Barcode inside the SVG
+                try {
+                    JsBarcode(`.barcode-${i}`, barcodeValue, {
+                        format: "CODE128",
+                        width: 1.5,
+                        height: 40,
+                        displayValue: true,
+                        fontSize: 10,
+                        margin: 0
+                    });
+                } catch (e) {
+                    console.error("Barcode Error", e);
+                }
+            }
         }
-    }
-</script>
-{% endblock %}
+    </script>
+
+</body>
+</html>

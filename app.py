@@ -220,9 +220,7 @@ def forgot_password():
             session['reset_email'] = email
             
             try:
-                msg = Message('Password Reset Code', recipients=[email])
-                msg.body = f'Your OTP is: {otp}'
-                mail.send(msg)
+                
                 flash('OTP sent to your email!')
             except Exception as e:
                 print(f"Error: {e}")

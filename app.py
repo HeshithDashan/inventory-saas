@@ -141,7 +141,14 @@ class Return(db.Model):
     reason = db.Column(db.String(200), nullable=True)
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
-
+class Damage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    product_name = db.Column(db.String(150), nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
+    loss_amount = db.Column(db.Float, nullable=False)
+    note = db.Column(db.String(200), nullable=True)
+    date = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 
